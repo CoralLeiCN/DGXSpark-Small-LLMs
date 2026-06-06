@@ -71,6 +71,8 @@ Validate the local OpenAI-compatible vLLM endpoint:
 uv run python validate_vllm.py
 ```
 
+The validator waits up to 10 minutes by default because vLLM can take several minutes to load the checkpoint before the API is ready. Override this with `VLLM_VALIDATE_TIMEOUT_SECONDS` or adjust polling with `VLLM_VALIDATE_INTERVAL_SECONDS`.
+
 For the Super profile, validate with its served model name:
 
 ```sh
