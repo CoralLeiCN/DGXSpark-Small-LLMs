@@ -1,7 +1,7 @@
 name: dgxspark-nemotron-vllm
 
 x-vllm-common: &vllm-common
-  image: ${VLLM_IMAGE:-nvcr.io/nvidia/vllm:26.05-py3}
+  image: ${VLLM_IMAGE:-nvcr.io/nvidia/vllm:25.12.post1-py3}
   gpus: all
   ipc: host
   ports:
@@ -59,7 +59,7 @@ services:
       - ${MOE_BACKEND:-marlin}
 
   vllm-nano:
-    image: ${VLLM_IMAGE:-nvcr.io/nvidia/vllm:26.05-py3}
+    image: ${VLLM_IMAGE:-nvcr.io/nvidia/vllm:25.12.post1-py3}
     gpus: all
     ipc: host
     ports:
