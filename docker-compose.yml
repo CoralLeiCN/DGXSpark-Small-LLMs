@@ -66,7 +66,12 @@ services:
       - "${VLLM_PORT:-8000}:8000"
     volumes:
       - "${HF_CACHE_DIR:-${HOME}/.cache/huggingface}:/root/.cache/huggingface"
-      - "${NANO_REASONING_PARSER_PATH:-./nano_v3_reasoning_parser.py}:/workspace/nano_v3_reasoning_parser.py:ro"
+      - type: bind
+        source: ${NANO_REASONING_PARSER_PATH:-./nano_v3_reasoning_parser.py}
+        target: /workspace/nano_v3_reasoning_parser.py
+        read_only: true
+        bind:
+          create_host_path: false
     working_dir: /workspace
     environment:
       HF_TOKEN: ${HF_TOKEN:-}
