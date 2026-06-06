@@ -1,0 +1,101 @@
+name: dgxspark-nemotron-vllm
+
+x-vllm-common: &vllm-common
+  image: ${VLLM_IMAGE:-nvcr.io/nvidia/vllm:26.05-py3}
+  gpus: all
+  ipc: host
+  ports:
+    - "${VLLM_PORT:-8000}:8000"
+  volumes:
+    - "${HF_CACHE_DIR:-${HOME}/.cache/huggingface}:/root/.cache/huggingface"
+  environment:
+    HF_TOKEN: ${HF_TOKEN:-}
+
+services:
+  vllm-super:
+    <<: *vllm-common
+    container_name: ${VLLM_CONTAINER_NAME:-vllm-super}
+    environment:
+      HF_TOKEN: ${HF_TOKEN:-}
+      VLLM_NVFP4_GEMM_BACKEND: ${VLLM_NVFP4_GEMM_BACKEND:-marlin}
+      VLLM_ALLOW_LONG_MAX_MODEL_LEN: ${VLLM_ALLOW_LONG_MAX_MODEL_LEN:-1}
+      VLLM_FLASHINFER_ALLREDUCE_BACKEND: ${VLLM_FLASHINFER_ALLREDUCE_BACKEND:-trtllm}
+    profiles:
+      - super
+    command:
+      - vllm
+      - serve
+      - nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4
+      - --served-model-name
+      - ${SUPER_SERVED_MODEL_NAME:-nemotron-3-super}
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --async-scheduling
+      - --dtype
+      - auto
+      - --kv-cache-dtype
+      - fp8
+      - --tensor-parallel-size
+      - "${TENSOR_PARALLEL_SIZE:-1}"
+      - --pipeline-parallel-size
+      - "${PIPELINE_PARALLEL_SIZE:-1}"
+      - --data-parallel-size
+      - "${DATA_PARALLEL_SIZE:-1}"
+      - --trust-remote-code
+      - --gpu-memory-utilization
+      - "${GPU_MEMORY_UTILIZATION:-0.90}"
+      - --enable-chunked-prefill
+      - --max-num-seqs
+      - "${MAX_NUM_SEQS:-4}"
+      - --max-model-len
+      - "${MAX_MODEL_LEN:-394000}"
+      - --attention-backend
+      - ${ATTENTION_BACKEND:-TRITON_ATTN}
+      - --mamba-ssm-cache-dtype
+      - ${MAMBA_SSM_CACHE_DTYPE:-float32}
+      - --moe-backend
+      - ${MOE_BACKEND:-marlin}
+
+  vllm-nano:
+    image: ${VLLM_IMAGE:-nvcr.io/nvidia/vllm:26.05-py3}
+    gpus: all
+    ipc: host
+    ports:
+      - "${VLLM_PORT:-8000}:8000"
+    volumes:
+      - "${HF_CACHE_DIR:-${HOME}/.cache/huggingface}:/root/.cache/huggingface"
+      - "${NANO_REASONING_PARSER_PATH:-./nano_v3_reasoning_parser.py}:/workspace/nano_v3_reasoning_parser.py:ro"
+    working_dir: /workspace
+    environment:
+      HF_TOKEN: ${HF_TOKEN:-}
+      VLLM_USE_FLASHINFER_MOE_FP4: "1"
+      VLLM_FLASHINFER_MOE_BACKEND: throughput
+    container_name: ${VLLM_CONTAINER_NAME:-vllm-nano}
+    profiles:
+      - nano
+    command:
+      - vllm
+      - serve
+      - nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-NVFP4
+      - --served-model-name
+      - ${NANO_SERVED_MODEL_NAME:-model}
+      - --max-num-seqs
+      - "${NANO_MAX_NUM_SEQS:-8}"
+      - --tensor-parallel-size
+      - "${TENSOR_PARALLEL_SIZE:-1}"
+      - --max-model-len
+      - "${NANO_MAX_MODEL_LEN:-262144}"
+      - --port
+      - "8000"
+      - --trust-remote-code
+      - --enable-auto-tool-choice
+      - --tool-call-parser
+      - qwen3_coder
+      - --reasoning-parser-plugin
+      - nano_v3_reasoning_parser.py
+      - --reasoning-parser
+      - nano_v3
+      - --kv-cache-dtype
+      - fp8

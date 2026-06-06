@@ -1,0 +1,9 @@
+[project]
+name = "dgxspark-nemotron-3-super-120b-a12b"
+version = "0.1.0"
+description = "Run and validate NVIDIA Nemotron 3 NVFP4 checkpoints on NVIDIA DGX Spark."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "openai>=1.0.0",
+]
