@@ -1,0 +1,65 @@
+name: dgxspark-nemotron-3-nano
+
+services:
+  sglang:
+    image: dgxspark/nemotron-3-nano-30b-a3b-nvfp4-sglang:0.1.0
+    pull_policy: never
+    build:
+      context: .
+      dockerfile: Dockerfile
+      pull: false
+      args:
+        BASE_IMAGE: ${NVIDIA_PYTORCH_IMAGE:-nvcr.io/nvidia/pytorch:26.02-py3}
+        SGLANG_VERSION: ${SGLANG_VERSION:-0.5.15.post1}
+        SGLANG_EXCLUDE_NEWER: ${SGLANG_EXCLUDE_NEWER:-2026-07-15T00:00:00Z}
+    environment:
+      HF_TOKEN: ${HF_TOKEN:-}
+      HF_HUB_DISABLE_IMPLICIT_TOKEN: ${HF_HUB_DISABLE_IMPLICIT_TOKEN:-1}
+      MODEL_ID: nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-NVFP4
+      SERVED_MODEL_NAME: nemotron-3-nano
+      SGLANG_CONTAINER_PORT: "30000"
+      CONTEXT_LENGTH: ${CONTEXT_LENGTH:-32768}
+      GPU_MEMORY_BUDGET_GIB: ${GPU_MEMORY_BUDGET_GIB:-60}
+      MEM_FRACTION_STATIC: ${MEM_FRACTION_STATIC:-}
+      MAX_JOBS: ${MAX_JOBS:-4}
+      SGLANG_EXTRA_ARGS: ${SGLANG_EXTRA_ARGS:-}
+    ports:
+      - "${SGLANG_PORT:-30000}:30000"
+    volumes:
+      - type: bind
+        source: ${HF_CACHE_DIR:-${HOME}/.cache/huggingface}
+        target: /root/.cache/huggingface
+      - type: volume
+        source: flashinfer-cache
+        target: /root/.cache/flashinfer
+      - type: volume
+        source: sglang-cache
+        target: /root/.cache/sglang
+    ipc: host
+    shm_size: 32gb
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - --silent
+        - http://127.0.0.1:30000/health
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 30m
+    restart: unless-stopped
+
+volumes:
+  flashinfer-cache:
+  sglang-cache:
