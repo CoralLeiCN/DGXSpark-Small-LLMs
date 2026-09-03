@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+exec uv run --python 3.12 dgxspark deploy \
+  nvidia/nvidia-nemotron-3-nano-30b-a3b-nvfp4 \
+  --engine sglang \
+  "$@"

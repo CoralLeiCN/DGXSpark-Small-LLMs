@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dgxspark-model-hub"
+version = "0.1.0"
+description = "Container-first model serving recipes for NVIDIA DGX Spark"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pyyaml>=6.0.2,<7",
+]
+
+[project.scripts]
+dgxspark = "dgxspark_hub.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dgxspark_hub"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

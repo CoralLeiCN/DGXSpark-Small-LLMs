@@ -3,15 +3,21 @@
 - Use `uv` for dependency management and Python command execution.
 - Target Python 3.12 for development and runtime assumptions.
 - Do not add tests unless the user explicitly asks for tests or the change is a regression fix that needs a regression test.
+- Use pytest for Python tests.
 - Treat this repository as a container-first DGX Spark model-serving hub.
 - Keep supported inference engines limited to vLLM and SGLang unless the project scope changes.
 - Prefer thin top-level scripts that call shared Python CLI code.
 - Keep model-serving dependencies inside model-specific Docker environments, not the host Python environment.
 - Do not assume one vLLM or SGLang version works for every model.
 - Keep model-specific launch flags in the relevant model engine folder.
-- Document important assumptions, tradeoffs, and user corrections in the relevant docs or spec file as they come up.
-- If the user corrects an architectural direction, update the spec or docs to reflect the correction rather than only acknowledging it in chat.
-- Maintain `docs/CORRECTIONS.md` as the dedicated record of user corrections and the reasons behind them.
+- Keep service-specific tests in the relevant model engine folder.
+- Keep documentation proportional to implemented behavior; avoid speculative
+  per-engine or troubleshooting docs before the corresponding recipe or
+  observation exists.
+- Document important assumptions, tradeoffs, and user corrections directly in
+  the relevant authoritative spec, guide, or model documentation as they arise.
+- If the user corrects an architectural direction, update its authoritative
+  documentation rather than keeping a separate duplicate correction history.
 - Maintain append-only inference experiment journals under
   `docs/experiments/<provider>/<model>/<engine>/` by following
   `docs/experiments/README.md`.
