@@ -29,6 +29,21 @@ The API is available at `http://localhost:30000/v1`. See the
 [model recipe](models/nvidia/nvidia-nemotron-3-nano-30b-a3b-nvfp4/README.md)
 for configuration and source documentation.
 
+## Qwen3.8 27B FP8
+
+The Qwen recipe serves
+[`Qwen/Qwen3.8-27B-FP8`](https://huggingface.co/Qwen/Qwen3.8-27B-FP8)
+with a Qwen3.8-capable SGLang image:
+
+```bash
+scripts/deploy qwen/qwen3.8-27b-fp8 --engine sglang
+scripts/validate-responses qwen/qwen3.8-27b-fp8 --engine sglang --timeout 600
+scripts/stop qwen/qwen3.8-27b-fp8 --engine sglang
+```
+
+See the [model recipe](models/qwen/qwen3.8-27b-fp8/README.md) for the DGX
+Spark memory assumptions and configuration controls.
+
 ## Commands
 
 All top-level scripts are thin wrappers around the Python 3.12 CLI and run
@@ -41,12 +56,18 @@ scripts/deploy <provider>/<model> --engine sglang
 scripts/status <provider>/<model> --engine sglang
 scripts/logs <provider>/<model> --engine sglang
 scripts/validate <provider>/<model> --engine sglang
+scripts/validate-responses <provider>/<model> --engine sglang
 scripts/stop <provider>/<model> --engine sglang
 ```
 
 `deploy` runs preflight checks, builds the model image, and starts it in the
 background. Model downloads are stored in the host Hugging Face cache and are
 not baked into the image.
+
+`validate` uses the endpoint selected by the model manifest.
+`validate-responses` explicitly tests the OpenAI-compatible `/v1/responses`
+endpoint. Responses API is the primary application path for recipes whose
+engine supports it, including Qwen3.8.
 
 Architecture details and design decisions are in
 [docs/SPEC.md](docs/SPEC.md). Failed Docker and inference runs, their diagnoses,

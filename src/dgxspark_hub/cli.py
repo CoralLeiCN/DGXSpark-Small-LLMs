@@ -21,7 +21,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    for command in ("build", "serve", "deploy", "stop", "logs", "status", "validate"):
+    for command in (
+        "build",
+        "serve",
+        "deploy",
+        "stop",
+        "logs",
+        "status",
+        "validate",
+        "validate-responses",
+    ):
         subparser = subparsers.add_parser(command)
         _add_model_arguments(subparser)
         if command == "logs":
@@ -30,7 +39,7 @@ def build_parser() -> argparse.ArgumentParser:
                 action="store_true",
                 help="Print current logs and exit instead of following them.",
             )
-        if command == "validate":
+        if command in {"validate", "validate-responses"}:
             subparser.add_argument(
                 "--timeout",
                 type=float,
@@ -83,6 +92,12 @@ def main(argv: list[str] | None = None) -> int:
             docker.compose(engine, ["ps"])
         elif args.command == "validate":
             _validate(
+                manifest,
+                _effective_port(engine.name, engine.port),
+                args.timeout,
+            )
+        elif args.command == "validate-responses":
+            _validate_responses(
                 manifest,
                 _effective_port(engine.name, engine.port),
                 args.timeout,
@@ -174,6 +189,14 @@ def _effective_port(engine_name: str, default: int) -> int:
 
 
 def _validate(manifest: ModelManifest, port: int, timeout: float) -> None:
+    if manifest.validation_endpoint == "/v1/responses":
+        _validate_responses(manifest, port, timeout)
+        return
+
+    _validate_chat(manifest, port, timeout)
+
+
+def _validate_chat(manifest: ModelManifest, port: int, timeout: float) -> None:
     url = f"http://127.0.0.1:{port}{manifest.validation_endpoint}"
     body = {
         "model": manifest.served_name,
@@ -182,20 +205,7 @@ def _validate(manifest: ModelManifest, port: int, timeout: float) -> None:
         "temperature": 0.6,
         "top_p": 0.95,
     }
-    request = urllib.request.Request(
-        url,
-        data=json.dumps(body).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
-            payload = json.load(response)
-    except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"validation returned HTTP {exc.code}: {detail}") from exc
-    except urllib.error.URLError as exc:
-        raise RuntimeError(f"cannot reach {url}: {exc.reason}") from exc
+    payload = _post_json(url, body, timeout)
 
     try:
         choice = payload["choices"][0]
@@ -219,6 +229,79 @@ def _validate(manifest: ModelManifest, port: int, timeout: float) -> None:
     if reasoning:
         print(f"Reasoning:\n{reasoning.strip()}\n")
     print(f"Response:\n{content.strip()}")
+
+
+def _validate_responses(manifest: ModelManifest, port: int, timeout: float) -> None:
+    url = f"http://127.0.0.1:{port}/v1/responses"
+    body = {
+        "model": manifest.served_name,
+        "input": manifest.validation_prompt,
+        "max_output_tokens": manifest.validation_max_tokens,
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "store": False,
+        "chat_template_kwargs": {"enable_thinking": False},
+    }
+    payload = _post_json(url, body, timeout)
+
+    status = payload.get("status")
+    if status != "completed":
+        raise RuntimeError(
+            "Responses API validation did not complete "
+            f"(status={status or 'unknown'}): {json.dumps(payload)}"
+        )
+
+    text_parts: list[str] = []
+    output_text = payload.get("output_text")
+    if isinstance(output_text, str) and output_text.strip():
+        text_parts.append(output_text.strip())
+
+    output = payload.get("output")
+    if not text_parts and isinstance(output, list):
+        for item in output:
+            if not isinstance(item, dict) or item.get("type") != "message":
+                continue
+            content = item.get("content")
+            if not isinstance(content, list):
+                continue
+            for part in content:
+                if not isinstance(part, dict) or part.get("type") != "output_text":
+                    continue
+                text = part.get("text")
+                if isinstance(text, str) and text.strip():
+                    text_parts.append(text.strip())
+
+    if not text_parts:
+        raise RuntimeError(
+            f"Responses API validation returned no output text: {json.dumps(payload)}"
+        )
+
+    response_id = payload.get("id", "unknown")
+    response_text = "\n".join(text_parts)
+    print(f"Response ID: {response_id}")
+    print(f"Status: {status}")
+    print(f"Response:\n{response_text}")
+
+
+def _post_json(url: str, body: dict[str, object], timeout: float) -> dict:
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            payload = json.load(response)
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"validation returned HTTP {exc.code}: {detail}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"cannot reach {url}: {exc.reason}") from exc
+
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"unexpected response: {json.dumps(payload)}")
+    return payload
 
 
 if __name__ == "__main__":

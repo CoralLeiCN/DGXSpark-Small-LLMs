@@ -223,7 +223,7 @@ engines:
     port: 30000
 
 validation:
-  endpoint: /v1/chat/completions
+  endpoint: /v1/responses
   prompt: Explain tensor parallelism in one paragraph.
   max_tokens: 128
 ```
@@ -237,6 +237,7 @@ scripts/build <provider>/<model> --engine vllm
 scripts/serve <provider>/<model> --engine vllm
 scripts/logs <provider>/<model> --engine vllm
 scripts/validate <provider>/<model> --engine vllm
+scripts/validate-responses <provider>/<model> --engine vllm
 scripts/stop <provider>/<model> --engine vllm
 ```
 
@@ -261,6 +262,9 @@ docker compose -f compose.yaml build
 - The host has Docker and NVIDIA container runtime support.
 - The host uses `uv` and Python 3.12 for repository tooling.
 - The model server API should prefer OpenAI-compatible endpoints where the engine supports them.
+- Responses API is the primary application and validation path when a model's
+  engine implements `/v1/responses`; Chat Completions remains a compatibility
+  path for engines and recipes that do not.
 - Models may be gated or require credentials, so `.env` files are local and not committed.
 - vLLM and SGLang versions may differ per model.
 - Some models may only support one of the two engines.
@@ -314,5 +318,4 @@ decision.
 
 - Should model images be built locally only, or eventually pushed to a registry?
 - Should downloaded model weights be shared through one host cache path, such as `/data/models`?
-- Should validation use only `/v1/chat/completions`, or support `/v1/completions` too?
 - Should `serve` run containers in attached mode or detached mode by default?

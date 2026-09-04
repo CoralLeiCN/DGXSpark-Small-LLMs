@@ -42,7 +42,8 @@ DGXSpark-Small-LLMs/
 |   |-- serve
 |   |-- stop
 |   |-- logs
-|   `-- validate
+|   |-- validate
+|   `-- validate-responses
 |-- src/
 |   `-- dgxspark_hub/
 |       |-- cli.py
@@ -85,6 +86,7 @@ scripts/build nvidia/nemotron-3-super-120b-a12b --engine vllm
 scripts/serve nvidia/nemotron-3-super-120b-a12b --engine vllm
 scripts/logs nvidia/nemotron-3-super-120b-a12b --engine vllm
 scripts/validate nvidia/nemotron-3-super-120b-a12b --engine vllm
+scripts/validate-responses nvidia/nemotron-3-super-120b-a12b --engine vllm
 scripts/stop nvidia/nemotron-3-super-120b-a12b --engine vllm
 ```
 
@@ -132,7 +134,7 @@ engines:
     port: 30000
 
 validation:
-  endpoint: /v1/chat/completions
+  endpoint: /v1/responses
   prompt: Explain tensor parallelism in one paragraph.
   max_tokens: 128
 ```
