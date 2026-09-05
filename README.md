@@ -29,6 +29,21 @@ The API is available at `http://localhost:30000/v1`. See the
 [model recipe](models/nvidia/nvidia-nemotron-3-nano-30b-a3b-nvfp4/README.md)
 for configuration and source documentation.
 
+## Gemma 4 26B A4B IT
+
+The Gemma recipe serves
+[`google/gemma-4-26B-A4B-it`](https://huggingface.co/google/gemma-4-26B-A4B-it)
+with a Gemma 4-capable SGLang image:
+
+```bash
+scripts/deploy google/gemma-4-26b-a4b-it --engine sglang
+scripts/validate google/gemma-4-26b-a4b-it --engine sglang --timeout 600
+scripts/stop google/gemma-4-26b-a4b-it --engine sglang
+```
+
+See the [model recipe](models/google/gemma-4-26b-a4b-it/README.md) for the DGX
+Spark memory assumptions and configuration controls.
+
 ## Qwen3.8 27B FP8
 
 The Qwen recipe serves

@@ -1,0 +1,62 @@
+name: dgxspark-gemma-4-26b-a4b-it
+
+services:
+  sglang:
+    image: dgxspark/gemma-4-26b-a4b-it-sglang:0.1.0
+    pull_policy: never
+    build:
+      context: .
+      dockerfile: Dockerfile
+      pull: false
+      args:
+        BASE_IMAGE: ${SGLANG_BASE_IMAGE:-lmsysorg/sglang:dev-qwen38-27b-dflash2}
+    environment:
+      HF_TOKEN: ${HF_TOKEN:-}
+      HF_HUB_DISABLE_IMPLICIT_TOKEN: ${HF_HUB_DISABLE_IMPLICIT_TOKEN:-1}
+      MODEL_ID: google/gemma-4-26B-A4B-it
+      SERVED_MODEL_NAME: gemma-4-26b-a4b-it
+      SGLANG_CONTAINER_PORT: "30000"
+      CONTEXT_LENGTH: ${CONTEXT_LENGTH:-32768}
+      MEM_FRACTION_STATIC: ${MEM_FRACTION_STATIC:-0.75}
+      MAX_RUNNING_REQUESTS: ${MAX_RUNNING_REQUESTS:-4}
+      SGLANG_EXTRA_ARGS: ${SGLANG_EXTRA_ARGS:-}
+    ports:
+      - "${SGLANG_PORT:-30000}:30000"
+    volumes:
+      - type: bind
+        source: ${HF_CACHE_DIR:-${HOME}/.cache/huggingface}
+        target: /root/.cache/huggingface
+      - type: volume
+        source: sglang-cache
+        target: /root/.cache/sglang
+      - type: volume
+        source: triton-cache
+        target: /root/.triton
+    ipc: host
+    shm_size: 32gb
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - --silent
+        - http://127.0.0.1:30000/health
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60m
+    restart: unless-stopped
+
+volumes:
+  sglang-cache:
+  triton-cache:
