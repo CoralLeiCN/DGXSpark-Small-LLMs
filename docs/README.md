@@ -1,6 +1,8 @@
-# DGX Spark Model Hub Design
+# InferPack Design
 
-This repo should be a small, container-first hub for running different LLMs on DGX Spark.
+This repository is a container-first catalog of hardware-targeted inference
+packs for running AI models on a single node or single GPU. The current packs
+target NVIDIA DGX Spark.
 
 See [SPEC.md](SPEC.md) for the current architecture spec and
 [experiments/README.md](experiments/README.md) for the failed-run journal guide
@@ -45,7 +47,7 @@ DGXSpark-Small-LLMs/
 |   |-- validate
 |   `-- validate-responses
 |-- src/
-|   `-- dgxspark_hub/
+|   `-- inferpack/
 |       |-- cli.py
 |       |-- manifest.py
 |       `-- docker.py
@@ -82,6 +84,7 @@ Do not add global vLLM or SGLang installs for serving. The shared Python package
 Top-level scripts should be thin wrappers around the Python CLI:
 
 ```bash
+scripts/models
 scripts/build nvidia/nemotron-3-super-120b-a12b --engine vllm
 scripts/serve nvidia/nemotron-3-super-120b-a12b --engine vllm
 scripts/logs nvidia/nemotron-3-super-120b-a12b --engine vllm
@@ -93,7 +96,7 @@ scripts/stop nvidia/nemotron-3-super-120b-a12b --engine vllm
 Each script can simply call:
 
 ```bash
-uv run --python 3.12 dgxspark <command> "$@"
+uv run --python 3.12 infer <command> "$@"
 ```
 
 The CLI should then run Docker Compose from the selected model engine directory.

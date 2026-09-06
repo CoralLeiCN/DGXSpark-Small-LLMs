@@ -5,7 +5,7 @@ import os
 import subprocess
 from pathlib import Path
 
-from dgxspark_hub.manifest import load_manifest
+from inferpack.manifest import load_manifest
 
 
 ENGINE_DIR = Path(__file__).resolve().parents[1]

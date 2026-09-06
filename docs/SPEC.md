@@ -1,12 +1,14 @@
-# DGX Spark Model Hub Spec
+# InferPack Spec
 
 Status: draft
 
-This spec describes the architecture for this DGX Spark model-serving hub.
+This spec describes the architecture for hardware-targeted inference packs.
 
 ## Goal
 
-Build and maintain multiple model-serving recipes for DGX Spark, with each model able to define its own runtime environment for vLLM or SGLang.
+Build and maintain ready-to-run inference packs for single-node or single-GPU
+hardware targets, with each model able to define its own runtime environment
+for vLLM or SGLang. The current hardware target is NVIDIA DGX Spark.
 
 The repository should make it easy to:
 
@@ -15,6 +17,13 @@ The repository should make it easy to:
 - build the model-specific container
 - start, stop, inspect, and validate the service
 - keep incompatible model runtimes isolated from each other
+
+The initial catalog contains language models. The pack format should remain
+model-type neutral so qualified vision-language, embedding, OCR, parser, and
+other inference workloads can be added without renaming the project or CLI.
+Before the first non-generative pack is added, the manifest must evolve to
+describe its task and modalities and select task-specific validation instead of
+forcing embedding, OCR, or parser services through chat-oriented fields.
 
 ## Technical Decision: Supported Inference Engines
 
@@ -45,25 +54,31 @@ Out of scope:
 
 ## Core Architecture
 
-Model serving on DGX Spark is container-first. The repository does not provide
+Model serving is container-first. The repository does not provide
 one universal serving environment: CUDA, PyTorch, inference-engine, tokenizer,
 and quantization compatibility can differ by model, and an environment that
 works for one model may break another.
 
-The main deployment unit is:
+An **inference pack** is a versioned model-serving environment configured and
+validated for a specific model, engine, and hardware target. The main
+deployment unit is:
 
 ```text
-model + engine
+model + engine + hardware target
 ```
 
 Examples:
 
 ```text
-nvidia/nemotron-3-super-120b-a12b + vllm
-google/gemma + sglang
+nvidia/nemotron-3-super-120b-a12b + vllm + dgx-spark
+google/gemma + sglang + dgx-spark
 ```
 
-Each deployment unit owns its own Dockerfile, Compose file, startup script, and runtime configuration. This avoids forcing all models to share one CUDA, PyTorch, vLLM, or SGLang version.
+Each deployment unit owns its own Dockerfile, Compose file, startup script, and
+runtime configuration. This avoids forcing all models to share one CUDA,
+PyTorch, vLLM, or SGLang version. The current directory layout does not encode
+the hardware target because every implemented pack targets DGX Spark; adding a
+second target requires an explicit manifest and layout design update.
 
 The repository has two layers:
 
@@ -79,7 +94,7 @@ Model-specific serving environments should contain the real inference dependenci
 Target layout:
 
 ```text
-DGXSpark-Small-LLMs/
+inferpack/
 |-- README.md
 |-- pyproject.toml
 |-- uv.lock
@@ -98,7 +113,7 @@ DGXSpark-Small-LLMs/
 |   |-- logs
 |   `-- validate
 |-- src/
-|   `-- dgxspark_hub/
+|   `-- inferpack/
 |       |-- __init__.py
 |       |-- cli.py
 |       |-- manifest.py
@@ -132,10 +147,10 @@ Top-level scripts are user-facing wrappers. They should stay thin and call the P
 Example shape:
 
 ```bash
-uv run --python 3.12 dgxspark build "$@"
+uv run --python 3.12 infer build "$@"
 ```
 
-### `src/dgxspark_hub/`
+### `src/inferpack/`
 
 This package owns shared repository behavior:
 
@@ -233,6 +248,7 @@ validation:
 The intended user interface is:
 
 ```bash
+scripts/models
 scripts/build <provider>/<model> --engine vllm
 scripts/serve <provider>/<model> --engine vllm
 scripts/logs <provider>/<model> --engine vllm
@@ -241,7 +257,9 @@ scripts/validate-responses <provider>/<model> --engine vllm
 scripts/stop <provider>/<model> --engine vllm
 ```
 
-The CLI should translate those commands into Docker Compose operations in the selected engine folder.
+`models` should discover available recipes from `models/*/*/manifest.yaml`. The
+model-specific commands should translate into Docker Compose operations in the
+selected engine folder.
 
 For example:
 
