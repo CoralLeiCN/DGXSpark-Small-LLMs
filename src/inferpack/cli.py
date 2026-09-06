@@ -11,15 +11,25 @@ import urllib.request
 from pathlib import Path
 
 from . import docker
-from .manifest import ManifestError, ModelManifest, load_manifest
+from .manifest import (
+    ManifestError,
+    ModelManifest,
+    discover_manifests,
+    load_manifest,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="dgxspark",
-        description="Build and operate model-specific DGX Spark containers.",
+        prog="infer",
+        description="Build and operate hardware-targeted inference packs.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    subparsers.add_parser(
+        "models",
+        help="List the inference packs available in this repository.",
+    )
 
     for command in (
         "build",
@@ -70,6 +80,10 @@ def _add_model_arguments(parser: argparse.ArgumentParser) -> None:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        if args.command == "models":
+            _list_models()
+            return 0
+
         manifest = load_manifest(args.model)
         engine = manifest.engine(args.engine)
 
@@ -108,6 +122,39 @@ def main(argv: list[str] | None = None) -> int:
     except (docker.DockerError, ManifestError, OSError, RuntimeError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
+
+
+def _list_models() -> None:
+    manifests = discover_manifests()
+    if not manifests:
+        print("No inference packs found.")
+        return
+
+    rows = [
+        (
+            manifest.identifier,
+            ",".join(sorted(manifest.engines)),
+            manifest.served_name,
+        )
+        for manifest in manifests
+    ]
+    headers = ("MODEL", "ENGINES", "SERVED NAME")
+    widths = [
+        max(len(header), *(len(row[index]) for row in rows))
+        for index, header in enumerate(headers)
+    ]
+
+    header_prefix = "  ".join(
+        header.ljust(widths[index])
+        for index, header in enumerate(headers[:-1])
+    )
+    print(f"{header_prefix}  {headers[-1]}")
+    for row in rows:
+        row_prefix = "  ".join(
+            value.ljust(widths[index])
+            for index, value in enumerate(row[:-1])
+        )
+        print(f"{row_prefix}  {row[-1]}")
 
 
 def _preflight(

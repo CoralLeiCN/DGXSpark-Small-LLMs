@@ -1,3 +1,5 @@
+"""Discovery and validation for inference pack manifests."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -44,6 +46,18 @@ class ModelManifest:
 
 def repository_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+def discover_manifests(root: Path | None = None) -> list[ModelManifest]:
+    root = root or repository_root()
+    models_root = root / "models"
+    manifests: list[ModelManifest] = []
+
+    for path in sorted(models_root.glob("*/*/manifest.yaml")):
+        identifier = "/".join(path.relative_to(models_root).parts[:2])
+        manifests.append(load_manifest(identifier, root))
+
+    return manifests
 
 
 def load_manifest(identifier: str, root: Path | None = None) -> ModelManifest:
