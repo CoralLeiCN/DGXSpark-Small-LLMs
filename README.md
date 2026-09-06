@@ -19,6 +19,10 @@ source .venv/bin/activate
 infer models
 ```
 
+The Codex app local environment is defined in
+`.codex/environments/environment.toml`. New worktrees install the host-side
+development dependencies with `uv` automatically.
+
 ## NVIDIA Nemotron 3 Nano NVFP4
 
 The first recipe serves
