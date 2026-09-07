@@ -179,11 +179,15 @@ def _list_models() -> None:
 
 def _list_services(*, include_all: bool) -> None:
     rows = []
+    seen_ids: set[str] = set()
     for manifest in discover_manifests():
         for engine in manifest.engines.values():
             for target in engine.targets.values():
                 containers = docker.compose_ps(target, include_all=include_all)
                 for container in sorted(containers, key=lambda item: item["Name"]):
+                    if container["ID"] in seen_ids:
+                        continue
+                    seen_ids.add(container["ID"])
                     rows.append(
                         (
                             manifest.identifier,

@@ -129,6 +129,9 @@ uv run --python 3.12 infer services --all  # Include stopped containers.
 the current Docker daemon using each pack's Compose configuration; unrelated
 Docker projects are not included. A running container may still be loading its
 model, so check the health column and use `infer validate` to verify the API.
+Containers must have Compose ownership labels matching a current pack's paths;
+containers created from old recipe paths are omitted. A project-name override
+does not make the same container appear under multiple models.
 Containers removed by `infer stop` are no longer listed, even with `--all`.
 
 `deploy` runs preflight checks, builds the model image, and starts it in the

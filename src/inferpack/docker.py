@@ -41,7 +41,7 @@ def compose(
 
 
 def compose_ps(target: HardwareTarget, *, include_all: bool = False) -> list[dict]:
-    arguments = ["ps", "--format", "json"]
+    arguments = ["ps", "--format", "json", "--no-trunc"]
     arguments.extend(["--all"] if include_all else ["--status", "running"])
     result = compose(target, arguments, check=False, capture_output=True)
     if result.returncode != 0:
@@ -69,14 +69,36 @@ def compose_ps(target: HardwareTarget, *, include_all: bool = False) -> list[dic
         not isinstance(container, dict)
         or any(
             not isinstance(container.get(field), str)
-            for field in ("Name", "Service", "State")
+            for field in ("ID", "Name", "Service", "State")
         )
         for container in containers
     ):
         raise DockerError(
             f"Unexpected Docker Compose output for {target.compose_file}"
         )
-    return containers
+    if not containers:
+        return []
+
+    # A project-name override can make different packs query the same project.
+    # Only attribute containers created from this pack's directory and config.
+    owned = run(
+        [
+            "docker",
+            "container",
+            "ls",
+            "--all",
+            "--no-trunc",
+            "--filter",
+            f"label=com.docker.compose.project.working_dir={target.directory.resolve()}",
+            "--filter",
+            f"label=com.docker.compose.project.config_files={target.compose_file.resolve()}",
+            "--format",
+            "{{.ID}}",
+        ],
+        capture_output=True,
+    )
+    owned_ids = set(owned.stdout.splitlines())
+    return [container for container in containers if container["ID"] in owned_ids]
 
 
 def image_exists(image: str) -> bool:

@@ -303,7 +303,12 @@ and actual port bindings. It needs no model or target arguments. `--all` also
 includes stopped containers; packs with no containers have no rows. This is a
 read-only snapshot of the repository's Compose projects, not a host-wide Docker
 inventory or an API readiness check. Project selection follows the same Compose
-configuration and environment as the lifecycle commands.
+configuration and environment as the lifecycle commands. Before attributing a
+container to a pack, its Compose working-directory and configuration-file labels
+must match that pack's current directory and single Compose file. Container IDs
+are deduplicated, so a shared `COMPOSE_PROJECT_NAME` cannot list one container
+under several models. Containers with missing or different ownership labels,
+including those created from a previous recipe path, are omitted.
 
 ## Runtime Assumptions
 
