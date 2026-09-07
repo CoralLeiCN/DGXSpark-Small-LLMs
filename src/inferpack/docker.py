@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -37,6 +38,45 @@ def compose(
         check=check,
         capture_output=capture_output,
     )
+
+
+def compose_ps(target: HardwareTarget, *, include_all: bool = False) -> list[dict]:
+    arguments = ["ps", "--format", "json"]
+    arguments.extend(["--all"] if include_all else ["--status", "running"])
+    result = compose(target, arguments, check=False, capture_output=True)
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout).strip()
+        raise DockerError(
+            f"Cannot list containers for {target.compose_file}: "
+            f"{detail or f'Docker Compose exited with code {result.returncode}'}"
+        )
+
+    output = result.stdout.strip()
+    if not output:
+        return []
+    try:
+        # Older Compose releases emit an array; current releases use JSON Lines.
+        containers = (
+            json.loads(output)
+            if output.startswith("[")
+            else [json.loads(line) for line in output.splitlines() if line.strip()]
+        )
+    except json.JSONDecodeError as exc:
+        raise DockerError(
+            f"Invalid Docker Compose JSON for {target.compose_file}"
+        ) from exc
+    if not isinstance(containers, list) or any(
+        not isinstance(container, dict)
+        or any(
+            not isinstance(container.get(field), str)
+            for field in ("Name", "Service", "State")
+        )
+        for container in containers
+    ):
+        raise DockerError(
+            f"Unexpected Docker Compose output for {target.compose_file}"
+        )
+    return containers
 
 
 def image_exists(image: str) -> bool:
