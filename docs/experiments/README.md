@@ -6,10 +6,11 @@ why it happened, what changed, and how the result was verified.
 
 ## Journal Location
 
-Each deployable `model + engine` pair owns an indexed directory:
+Each deployable `model + engine + hardware target` pack owns an indexed
+directory:
 
 ```text
-docs/experiments/<provider>/<model>/<engine>/
+docs/experiments/<model>/<engine>/<hardware>/
 |-- README.md
 `-- <YYYY-MM-DDTHH-MM-SSZ>-<short-slug>.md
 ```
@@ -17,11 +18,11 @@ docs/experiments/<provider>/<model>/<engine>/
 The path mirrors the deployment recipe under `models/`. For example:
 
 ```text
-models/nvidia/nvidia-nemotron-3-nano-30b-a3b-nvfp4/sglang/
-docs/experiments/nvidia/nvidia-nemotron-3-nano-30b-a3b-nvfp4/sglang/
+models/nvidia-nemotron-3-nano-30b-a3b-nvfp4/sglang/targets/dgx-spark/
+docs/experiments/nvidia-nemotron-3-nano-30b-a3b-nvfp4/sglang/dgx-spark/
 ```
 
-The engine journal's `README.md` links to its deployment recipe and lists every
+The target journal's `README.md` links to its deployment recipe and lists every
 turn in chronological order with its status and outcome. Link the model README
 back to that index.
 
@@ -44,10 +45,10 @@ Treat a completed turn file as immutable apart from correcting a typo or
 redacting a secret. Do not fold later knowledge into the earlier account. The
 directory is append-only: add new turn files and index rows over time.
 
-Every turn also receives an engine-local sequential ID. Use `RUN-` followed by
+Every turn also receives a target-local sequential ID. Use `RUN-` followed by
 four digits, beginning with `RUN-0001`. Put the ID immediately below the title,
 assign the next unused number even when the preceding run is unresolved, and
-never reuse or renumber an ID. The engine index must state the number of recorded
+never reuse or renumber an ID. The target index must state the number of recorded
 runs and the next ID to assign.
 
 ## What To Record
@@ -71,7 +72,7 @@ Do not reconstruct or invent experiments that were not observed.
 
 ## Investigation Workflow
 
-1. Read the engine index and assign its next run ID.
+1. Read the target index and assign its next run ID.
 2. Create the turn file when a failure is observed.
 3. Capture the command, useful error excerpt, and relevant logs.
 4. Record enough environment detail to reproduce the compatibility boundary.
@@ -80,7 +81,7 @@ Do not reconstruct or invent experiments that were not observed.
 7. Describe the exact configuration, image, dependency, or code change attempted.
 8. Re-run the failing step, then validate the running API when possible.
 9. Extract a lesson that can prevent the same class of failure elsewhere.
-10. Add the ID and turn to the engine index, then advance its counters.
+10. Add the ID and turn to the target index, then advance its counters.
 
 Prefer exact versions, image tags or digests, model revisions, and configuration
 values over descriptions such as "latest" or "default." Note whether the repo
@@ -101,7 +102,7 @@ Run ID: `RUN-NNNN`
 - Phase: preflight | image pull | build | container startup | engine startup | model load | health check | inference
 - Related turns: [Earlier observation](earlier-turn.md), or `none`
 - Repo revision: commit SHA, plus `dirty` when relevant
-- Host/GPU: DGX Spark details relevant to the failure
+- Host/GPU: hardware target and details relevant to the failure
 - Container: exact image tag or digest
 - Engine: vLLM or SGLang and exact version
 - Model: repository ID, revision, and quantization
@@ -150,12 +151,12 @@ that should inform future inference services.
 State the next experiment, remaining risk, or `None` when the chain is resolved.
 ````
 
-## Engine Index Template
+## Target Index Template
 
 ```markdown
-# Model Name — Engine Experiment Journal
+# Model Name — Engine — Hardware Target Experiment Journal
 
-Deployment recipe: [`models/<provider>/<model>/<engine>/`](...)
+Deployment recipe: [`models/<model>/<engine>/targets/<hardware>/`](...)
 
 Runs recorded: 1
 

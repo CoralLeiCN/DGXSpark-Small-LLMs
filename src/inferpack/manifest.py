@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -14,18 +15,39 @@ class ManifestError(ValueError):
 
 
 @dataclass(frozen=True)
-class Engine:
+class HardwareTarget:
     name: str
     directory: Path
     compose_file: Path
     port: int
+    image: str
     base_image: str | None
     base_image_env: str | None
+    host_architectures: tuple[str, ...]
+    status: str
+
+
+@dataclass(frozen=True)
+class Engine:
+    name: str
+    targets: dict[str, HardwareTarget]
+
+    def target(self, name: str) -> HardwareTarget:
+        try:
+            return self.targets[name]
+        except KeyError as exc:
+            choices = ", ".join(sorted(self.targets)) or "none"
+            raise ManifestError(
+                f"Hardware target {name!r} is not available for engine "
+                f"{self.name!r}; available: {choices}"
+            ) from exc
 
 
 @dataclass(frozen=True)
 class ModelManifest:
     identifier: str
+    name: str
+    provider: str
     model_repo: str
     served_name: str
     validation_endpoint: str
@@ -40,7 +62,8 @@ class ModelManifest:
         except KeyError as exc:
             choices = ", ".join(sorted(self.engines)) or "none"
             raise ManifestError(
-                f"Engine {name!r} is not enabled for {self.identifier}; enabled: {choices}"
+                f"Engine {name!r} is not available for {self.identifier}; "
+                f"available: {choices}"
             ) from exc
 
 
@@ -53,8 +76,8 @@ def discover_manifests(root: Path | None = None) -> list[ModelManifest]:
     models_root = root / "models"
     manifests: list[ModelManifest] = []
 
-    for path in sorted(models_root.glob("*/*/manifest.yaml")):
-        identifier = "/".join(path.relative_to(models_root).parts[:2])
+    for path in sorted(models_root.glob("*/manifest.yaml")):
+        identifier = path.parent.name
         manifests.append(load_manifest(identifier, root))
 
     return manifests
@@ -62,11 +85,13 @@ def discover_manifests(root: Path | None = None) -> list[ModelManifest]:
 
 def load_manifest(identifier: str, root: Path | None = None) -> ModelManifest:
     root = root or repository_root()
-    parts = identifier.split("/")
-    if len(parts) != 2 or any(not part for part in parts):
-        raise ManifestError("Model must use the form <provider>/<model>")
+    if not re.fullmatch(r"[a-z0-9][a-z0-9._-]*", identifier):
+        raise ManifestError(
+            "Model must be a lowercase slug containing letters, numbers, dots, "
+            "underscores, or hyphens"
+        )
 
-    path = root / "models" / parts[0] / parts[1] / "manifest.yaml"
+    path = root / "models" / identifier / "manifest.yaml"
     if not path.is_file():
         raise ManifestError(f"Model manifest not found: {path}")
 
@@ -90,26 +115,49 @@ def load_manifest(identifier: str, root: Path | None = None) -> ModelManifest:
     engines: dict[str, Engine] = {}
 
     for name, raw_engine in engines_data.items():
-        if not isinstance(raw_engine, dict) or not raw_engine.get("enabled", False):
-            continue
-        compose = _required_string(raw_engine, "compose")
-        compose_file = path.parent / compose
-        if not compose_file.is_file():
-            raise ManifestError(f"Compose file not found: {compose_file}")
-        engines[name] = Engine(
-            name=name,
-            directory=compose_file.parent,
-            compose_file=compose_file,
-            port=_required_int(raw_engine, "port"),
-            base_image=_optional_string(raw_engine, "base_image"),
-            base_image_env=_optional_string(raw_engine, "base_image_env"),
-        )
+        if not isinstance(raw_engine, dict):
+            raise ManifestError(f"Engine {name!r} must be a mapping")
+
+        targets_data = _required_mapping(raw_engine, "targets")
+        targets: dict[str, HardwareTarget] = {}
+        for target_name, raw_target in targets_data.items():
+            if not isinstance(raw_target, dict):
+                raise ManifestError(
+                    f"Hardware target {target_name!r} for engine {name!r} "
+                    "must be a mapping"
+                )
+
+            compose = _required_string(raw_target, "compose")
+            compose_file = path.parent / compose
+            if not compose_file.is_file():
+                raise ManifestError(f"Compose file not found: {compose_file}")
+
+            host = _required_mapping(raw_target, "host")
+            targets[target_name] = HardwareTarget(
+                name=target_name,
+                directory=compose_file.parent,
+                compose_file=compose_file,
+                port=_required_int(raw_target, "port"),
+                image=_required_string(raw_target, "image"),
+                base_image=_optional_string(raw_target, "base_image"),
+                base_image_env=_optional_string(raw_target, "base_image_env"),
+                host_architectures=_required_string_tuple(
+                    host, "architectures"
+                ),
+                status=_required_string(raw_target, "status"),
+            )
+
+        if not targets:
+            raise ManifestError(f"No hardware targets are defined for engine {name!r}")
+        engines[name] = Engine(name=name, targets=targets)
 
     if not engines:
-        raise ManifestError(f"No engines are enabled in {path}")
+        raise ManifestError(f"No engines are defined in {path}")
 
     return ModelManifest(
         identifier=manifest_id,
+        name=_required_string(data, "name"),
+        provider=_required_string(data, "provider"),
         model_repo=_required_string(model, "repo"),
         served_name=_required_string(model, "served_name"),
         validation_endpoint=_required_string(validation, "endpoint"),
@@ -143,6 +191,19 @@ def _optional_string(data: dict[str, Any], key: str) -> str | None:
     if not isinstance(value, str) or not value:
         raise ManifestError(f"Manifest field {key!r} must be a non-empty string")
     return value
+
+
+def _required_string_tuple(data: dict[str, Any], key: str) -> tuple[str, ...]:
+    value = data.get(key)
+    if (
+        not isinstance(value, list)
+        or not value
+        or any(not isinstance(item, str) or not item for item in value)
+    ):
+        raise ManifestError(
+            f"Manifest field {key!r} must be a non-empty list of strings"
+        )
+    return tuple(value)
 
 
 def _required_int(data: dict[str, Any], key: str) -> int:

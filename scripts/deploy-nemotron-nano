@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 exec uv run --python 3.12 infer deploy \
-  nvidia/nvidia-nemotron-3-nano-30b-a3b-nvfp4 \
+  nvidia-nemotron-3-nano-30b-a3b-nvfp4 \
   --engine sglang \
+  --target dgx-spark \
   "$@"

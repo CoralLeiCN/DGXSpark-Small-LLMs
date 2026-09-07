@@ -1,0 +1,26 @@
+id: gemma-4-e4b-it
+name: Gemma 4 E4B IT
+provider: google
+
+model:
+  source: huggingface
+  repo: google/gemma-4-E4B-it
+  served_name: gemma-4-e4b-it
+
+engines:
+  sglang:
+    targets:
+      dgx-spark:
+        status: experimental
+        image: dgxspark/gemma-4-e4b-it-sglang:0.1.0
+        base_image: lmsysorg/sglang:dev-qwen38-27b-dflash2
+        base_image_env: SGLANG_BASE_IMAGE
+        compose: sglang/targets/dgx-spark/compose.yaml
+        port: 30000
+        host:
+          architectures: [aarch64, arm64]
+
+validation:
+  endpoint: /v1/chat/completions
+  prompt: "Reply with exactly this text and nothing else: DGX Spark Gemma E4B ready"
+  max_tokens: 512

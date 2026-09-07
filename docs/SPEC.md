@@ -7,16 +7,17 @@ This spec describes the architecture for hardware-targeted inference packs.
 ## Goal
 
 Build and maintain ready-to-run inference packs for single-node or single-GPU
-hardware targets, with each model able to define its own runtime environment
-for vLLM or SGLang. The current hardware target is NVIDIA DGX Spark.
+hardware targets, with each model able to define independent vLLM or SGLang
+environments for each supported hardware class. The currently implemented
+hardware target is NVIDIA DGX Spark.
 
 The repository should make it easy to:
 
-- add a new model
-- choose vLLM or SGLang when supported
-- build the model-specific container
-- start, stop, inspect, and validate the service
-- keep incompatible model runtimes isolated from each other
+- add a model without creating a provider namespace hierarchy
+- add a concrete hardware target only where that model and engine are supported
+- choose vLLM or SGLang
+- build, start, stop, inspect, and validate a selected deployment pack
+- keep incompatible model, engine, architecture, and hardware runtimes isolated
 
 The initial catalog contains language models. The pack format should remain
 model-type neutral so qualified vision-language, embedding, OCR, parser, and
@@ -25,23 +26,21 @@ Before the first non-generative pack is added, the manifest must evolve to
 describe its task and modalities and select task-specific validation instead of
 forcing embedding, OCR, or parser services through chat-oriented fields.
 
-## Technical Decision: Supported Inference Engines
+## Supported Inference Engines
 
-The initial technical research and architecture evaluation selected two
-inference engines for model-serving recipes:
+The supported serving engines are:
 
 - vLLM
 - SGLang
 
-Only these engines are supported. Other inference engines require a new
-technical evaluation and an explicit project-scope decision; an individual
-model recipe must not introduce one on its own.
+Other engines require a new technical evaluation and an explicit project-scope
+decision. An individual model target must not introduce another engine on its
+own.
 
 ## Non-goals
 
-The repository does not try to support every inference engine or deployment platform.
-
-Out of scope:
+The repository does not try to support every inference engine or deployment
+platform. The following remain out of scope:
 
 - TensorRT-LLM
 - NVIDIA NIM
@@ -50,18 +49,18 @@ Out of scope:
 - Kubernetes
 - multi-node orchestration
 - a web UI
-- a global Python environment that serves all models directly
+- a global Python environment that directly serves every model
+- implicit hardware-target selection based only on detected GPU names
 
-## Core Architecture
+## Deployment Identity
 
-Model serving is container-first. The repository does not provide
-one universal serving environment: CUDA, PyTorch, inference-engine, tokenizer,
-and quantization compatibility can differ by model, and an environment that
-works for one model may break another.
+Model serving is container-first. There is no universal serving environment:
+CPU architecture, CUDA, PyTorch, engine, tokenizer, quantization, attention
+backend, memory topology, and launch settings can differ across models and
+hardware.
 
-An **inference pack** is a versioned model-serving environment configured and
-validated for a specific model, engine, and hardware target. The main
-deployment unit is:
+An **inference pack** is a versioned serving environment configured and
+validated for one deployment identity:
 
 ```text
 model + engine + hardware target
@@ -70,28 +69,35 @@ model + engine + hardware target
 Examples:
 
 ```text
-nvidia/nemotron-3-super-120b-a12b + vllm + dgx-spark
-google/gemma + sglang + dgx-spark
+nvidia-nemotron-3-nano-30b-a3b-nvfp4 + sglang + dgx-spark
+gemma-4-e4b-it + sglang + dgx-spark
+example-model + vllm + rtx-4080-16gb
 ```
 
-Each deployment unit owns its own Dockerfile, Compose file, startup script, and
-runtime configuration. This avoids forcing all models to share one CUDA,
-PyTorch, vLLM, or SGLang version. The current directory layout does not encode
-the hardware target because every implemented pack targets DGX Spark; adding a
-second target requires an explicit manifest and layout design update.
+Every implemented deployment identity owns its Dockerfile, Compose file,
+startup script, environment defaults, and service tests. Do not assume that a
+container or launch configuration qualified on DGX Spark also works on a
+discrete RTX GPU.
 
-The repository has two layers:
+## Model And Hardware Identifiers
 
-1. Shared repo tooling
-2. Model-specific serving environments
+Model IDs are globally unique lowercase slugs. They may contain letters,
+numbers, dots, underscores, and hyphens, and must begin with a letter or number.
+They do not contain a provider path component.
 
-Shared repo tooling should be small. It should locate manifests, validate required files, and call Docker Compose. It should not import vLLM or SGLang directly.
+Provider remains explicit metadata in the manifest. The upstream source
+repository retains its canonical namespace, such as
+`google/gemma-4-E4B-it`. Include a provider or brand in the local slug when it
+improves recognition or avoids a collision, not because the directory layout
+requires it.
 
-Model-specific serving environments should contain the real inference dependencies and launch commands.
+Hardware target IDs describe reproducible hardware classes. Prefer precise
+slugs such as `dgx-spark` or `rtx-4080-16gb` over ambiguous names such as
+`4080`. A target directory is created only when a concrete recipe is being
+implemented; the repository does not materialize the full model-engine-hardware
+cross product.
 
 ## Repository Layout
-
-Target layout:
 
 ```text
 inferpack/
@@ -103,237 +109,244 @@ inferpack/
 |   |-- SPEC.md
 |   `-- experiments/
 |       |-- README.md
-|       `-- <provider>/<model>/<engine>/
+|       `-- <model>/<engine>/<hardware>/
 |           |-- README.md
 |           `-- <timestamp>-<slug>.md
 |-- scripts/
 |   |-- build
 |   |-- serve
+|   |-- deploy
 |   |-- stop
 |   |-- logs
-|   `-- validate
+|   |-- status
+|   |-- validate
+|   `-- validate-responses
 |-- src/
 |   `-- inferpack/
 |       |-- __init__.py
 |       |-- cli.py
 |       |-- manifest.py
-|       |-- docker.py
-|       `-- validation.py
+|       `-- docker.py
 `-- models/
-    `-- <provider>/
-        `-- <model>/
-            |-- manifest.yaml
-            |-- README.md
-            |-- vllm/
-            |   |-- Dockerfile
-            |   |-- compose.yaml
-            |   |-- start.sh
-            |   |-- .env.example
-            |   `-- tests/
-            `-- sglang/
-                |-- Dockerfile
-                |-- compose.yaml
-                |-- start.sh
-                |-- .env.example
-                `-- tests/
+    `-- <model>/
+        |-- manifest.yaml
+        |-- README.md
+        |-- vllm/
+        |   `-- targets/
+        |       `-- <hardware>/
+        |           |-- Dockerfile
+        |           |-- compose.yaml
+        |           |-- start.sh
+        |           |-- .env.example
+        |           `-- tests/
+        `-- sglang/
+            `-- targets/
+                `-- <hardware>/
+                    |-- Dockerfile
+                    |-- compose.yaml
+                    |-- start.sh
+                    |-- .env.example
+                    `-- tests/
 ```
 
 ## Component Responsibilities
 
 ### `scripts/`
 
-Top-level scripts are user-facing wrappers. They should stay thin and call the Python CLI through `uv`.
-
-Example shape:
+Top-level scripts are thin user-facing wrappers around the Python 3.12 CLI:
 
 ```bash
-uv run --python 3.12 infer build "$@"
+uv run --python 3.12 infer <command> "$@"
 ```
 
 ### `src/inferpack/`
 
-This package owns shared repository behavior:
+The shared package owns repository-level behavior:
 
 - parse command-line arguments
-- find model manifests
-- check whether an engine is enabled
-- resolve the model engine directory
-- run Docker Compose commands
-- perform basic validation requests
+- discover and validate model manifests
+- resolve a model, engine, and hardware target
+- validate declared host constraints during preflight
+- invoke Docker Compose from the selected target directory
+- perform basic API validation
 
-It should not own model-specific vLLM or SGLang flags.
+It must not import vLLM or SGLang or own model-specific launch flags.
 
-### `models/`
+### `models/<model>/`
 
-This is the model catalog. Each model has one folder under its provider.
+A model folder owns stable model-level information:
 
-A model folder owns:
+- globally unique identity and provider metadata
+- upstream repository and served name
+- API validation settings
+- human-readable model notes
+- implemented vLLM and/or SGLang target packs
 
-- identity and metadata in `manifest.yaml`
-- human notes in `README.md`
-- one optional `vllm/` folder
-- one optional `sglang/` folder
+### `models/<model>/<engine>/targets/<hardware>/`
 
-### `models/<provider>/<model>/<engine>/`
+This is the deployable serving environment. It owns:
 
-This is the actual deployable serving environment.
+- base image and pinned runtime versions
+- CPU/GPU-architecture-compatible dependencies
+- model- and hardware-specific launch flags and defaults
+- exposed ports, volumes, and GPU reservation
+- service health settings
+- target-specific service tests
 
-It owns:
-
-- base image choice
-- pinned runtime versions
-- model-specific launch flags
-- exposed port
-- environment defaults
-- Docker Compose service definition
-- service-specific tests
+Duplication between hardware targets is acceptable when it preserves a clear
+compatibility boundary. Extract shared model-engine files only after real
+targets demonstrate that they are identical and can remain so.
 
 ### `docs/experiments/`
 
-This is the operational learning record. Each `model + engine` deployment unit
-has an indexed journal directory at
-`docs/experiments/<provider>/<model>/<engine>/`. Each experiment turn has one
-immutable UTC-timestamped Markdown file and a stable engine-local sequential ID
-such as `RUN-0001`; later diagnosis or verification goes in a new linked turn
-file with the next ID. The engine index records the run count and next ID. Every
-observed Docker, engine-startup, model-loading, health-check, or inference
-failure is recorded with its environment, error, diagnosis, fix, verification,
-and reusable lesson. The journals complement the stable recipe documentation:
-model READMEs explain how the service should work, while turn files preserve how
-failures were actually investigated and resolved.
-
-## Model Manifest
-
-Each model should include a manifest at:
+Every deployment identity has an indexed, append-only journal at:
 
 ```text
-models/<provider>/<model>/manifest.yaml
+docs/experiments/<model>/<engine>/<hardware>/
 ```
 
-Minimal example:
+Each experiment turn has one immutable UTC-timestamped Markdown file and a
+stable target-local sequential ID such as `RUN-0001`. Later diagnosis or
+verification goes in a new linked turn with the next ID. Model READMEs describe
+the stable recipe; journals preserve the observed investigation history for a
+specific hardware target.
+
+## Manifest Schema
+
+Each model manifest lives at:
+
+```text
+models/<model>/manifest.yaml
+```
+
+Example:
 
 ```yaml
-id: nvidia/nemotron-3-super-120b-a12b
-name: Nemotron 3 Super 120B A12B
-provider: nvidia
-status: experimental
+id: gemma-4-e4b-it
+name: Gemma 4 E4B IT
+provider: google
 
 model:
   source: huggingface
-  repo: nvidia/REPLACE_WITH_REAL_REPO
-  local_path: /models/nemotron-3-super-120b-a12b
-  served_name: nemotron-3-super-120b-a12b
+  repo: google/gemma-4-E4B-it
+  served_name: gemma-4-e4b-it
 
 engines:
-  vllm:
-    enabled: true
-    image: dgxspark/nemotron-3-super-120b-a12b-vllm:0.1.0
-    compose: vllm/compose.yaml
-    port: 8000
-
   sglang:
-    enabled: false
-    image: dgxspark/nemotron-3-super-120b-a12b-sglang:0.1.0
-    compose: sglang/compose.yaml
-    port: 30000
+    targets:
+      dgx-spark:
+        status: experimental
+        image: dgxspark/gemma-4-e4b-it-sglang:0.1.0
+        base_image: lmsysorg/sglang:dev-qwen38-27b-dflash2
+        base_image_env: SGLANG_BASE_IMAGE
+        compose: sglang/targets/dgx-spark/compose.yaml
+        port: 30000
+        host:
+          architectures: [aarch64, arm64]
 
 validation:
-  endpoint: /v1/responses
-  prompt: Explain tensor parallelism in one paragraph.
+  endpoint: /v1/chat/completions
+  prompt: Reply with exactly this text and nothing else: ready
   max_tokens: 128
 ```
 
+Engine and target presence means the pack exists. Unsupported engines and
+hardware targets are omitted rather than represented by disabled placeholders.
+Qualification status belongs to the target because support observed on one
+hardware class says nothing about another.
+
+`host.architectures` declares the host CPU architectures supported by that
+target. Preflight rejects a selected target when the current host architecture
+does not match. Additional target constraints, such as minimum device memory or
+GPU compute capability, should be added when corresponding detection is
+implemented and validated.
+
 ## Command Model
 
-The intended user interface is:
+The user explicitly selects the hardware recipe:
 
 ```bash
 scripts/models
-scripts/build <provider>/<model> --engine vllm
-scripts/serve <provider>/<model> --engine vllm
-scripts/logs <provider>/<model> --engine vllm
-scripts/validate <provider>/<model> --engine vllm
-scripts/validate-responses <provider>/<model> --engine vllm
-scripts/stop <provider>/<model> --engine vllm
+scripts/preflight <model> --engine sglang --target <hardware>
+scripts/build <model> --engine sglang --target <hardware>
+scripts/serve <model> --engine sglang --target <hardware>
+scripts/deploy <model> --engine sglang --target <hardware>
+scripts/logs <model> --engine sglang --target <hardware>
+scripts/status <model> --engine sglang --target <hardware>
+scripts/validate <model> --engine sglang --target <hardware>
+scripts/validate-responses <model> --engine sglang --target <hardware>
+scripts/stop <model> --engine sglang --target <hardware>
 ```
-
-`models` should discover available recipes from `models/*/*/manifest.yaml`. The
-model-specific commands should translate into Docker Compose operations in the
-selected engine folder.
 
 For example:
 
 ```bash
-scripts/build nvidia/nemotron-3-super-120b-a12b --engine vllm
+scripts/build gemma-4-e4b-it --engine sglang --target dgx-spark
 ```
 
-should resolve to something like:
-
-```bash
-cd models/nvidia/nemotron-3-super-120b-a12b/vllm
-docker compose -f compose.yaml build
-```
-
-## Assumptions
-
-- DGX Spark deployments should run model servers in containers.
-- The host has Docker and NVIDIA container runtime support.
-- The host uses `uv` and Python 3.12 for repository tooling.
-- The model server API should prefer OpenAI-compatible endpoints where the engine supports them.
-- Responses API is the primary application and validation path when a model's
-  engine implements `/v1/responses`; Chat Completions remains a compatibility
-  path for engines and recipes that do not.
-- Models may be gated or require credentials, so `.env` files are local and not committed.
-- vLLM and SGLang versions may differ per model.
-- Some models may only support one of the two engines.
-- Official SGLang images or NVIDIA framework images are preferred over
-  unrelated third-party serving images to reduce provenance and compatibility
-  ambiguity.
-- Exact cached base-image tags should be reused when compatible, rather than
-  downloading a different large framework image. Cache reuse saves deployment
-  time and bandwidth but must not override model-specific compatibility.
-
-## First Implemented Model
-
-The first real deployment unit is:
+resolves to the Compose pack under:
 
 ```text
-nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-NVFP4 + SGLang
+models/gemma-4-e4b-it/sglang/targets/dgx-spark/
 ```
 
-Its Dockerfile defaults to the locally cached
-`nvcr.io/nvidia/pytorch:26.02-py3` ARM64 image. SGLang is pinned inside the
-model-specific image and is not installed into the host Python environment.
-The launch flags follow NVIDIA's model card and cookbook.
+`infer models` prints one row per implemented model, engine, and hardware
+target, including provider, target-level status, and served name.
+
+## Runtime Assumptions
+
+- Serving runs in containers with Docker and NVIDIA container runtime support.
+- The host uses `uv` and Python 3.12 only for lightweight repository tooling.
+- Models may require credentials, so `.env` files remain local and uncommitted.
+- Model downloads persist in a host Hugging Face cache and are not baked into
+  the image.
+- vLLM and SGLang versions may differ by model and target.
+- Some model and hardware combinations may support only one engine.
+- OpenAI-compatible endpoints are preferred where the selected engine supports
+  them.
+- Responses API is the primary application and validation path when available;
+  Chat Completions remains the compatibility path otherwise.
+- Official SGLang or NVIDIA framework images are preferred over unrelated
+  third-party serving images.
+- Exact cached base-image tags may be reused when compatible, but cache reuse
+  must not override model- or target-specific compatibility.
 
 ## Tradeoffs
 
-### Per-model containers over one shared environment
+### Explicit target directories
 
-This increases duplication across model folders, but it makes deployments more reproducible and avoids dependency conflicts between models.
+Target directories add a hierarchy level and may duplicate files, but they make
+architecture, memory, base-image, and qualification boundaries visible and
+reviewable.
 
-### Docker Compose over raw Docker commands
+### Flat model catalog
 
-Compose adds a small amount of file structure, but it makes ports, volumes, environment variables, GPU settings, and service names easier to inspect and reproduce.
+Globally unique model slugs remove repetitive provider nesting and make CLI
+commands shorter. The tradeoff is that uniqueness is enforced across the whole
+catalog; provider metadata and upstream repository IDs remain available for
+provenance.
 
-### Thin top-level scripts over large shell scripts
+### Explicit target selection
 
-Thin scripts keep the user interface simple while allowing validation and manifest parsing to live in Python. The tradeoff is that the Python CLI must exist before the scripts are useful.
+Requiring `--target` adds one CLI argument, but prevents a detected GPU or a
+default from silently choosing a recipe with different compatibility and memory
+assumptions.
 
-### Minimal manifest over full schema upfront
+### Per-pack containers
 
-A small manifest is easier to maintain early. The tradeoff is that fields may need to evolve as real models expose more requirements.
+Independent containers increase duplication, but keep dependency and hardware
+incompatibilities isolated.
 
-### vLLM and SGLang only
+### Minimal shared tooling
 
-The technical evaluation limits the supported engines to vLLM and SGLang to
-keep the repository focused and implementable while bounding its design and
-maintenance burden. The tradeoff is that some models may work better on other
-runtimes, but adopting one requires fresh research and an explicit project-scope
-decision.
+Keeping orchestration thin avoids coupling the host package to serving
+dependencies. Manifest fields should expand only as implemented targets expose
+requirements that shared preflight or discovery must understand.
 
 ## Open Questions
 
-- Should model images be built locally only, or eventually pushed to a registry?
-- Should downloaded model weights be shared through one host cache path, such as `/data/models`?
-- Should `serve` run containers in attached mode or detached mode by default?
+- Should model images remain local-only or eventually be pushed to a registry?
+- Should downloaded weights use a shared system cache such as `/data/models`?
+- Should `serve` use attached or detached mode by default?
+- Which capability checks beyond host architecture should become mandatory
+  before adding the first discrete-GPU target?

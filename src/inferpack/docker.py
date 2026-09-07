@@ -8,7 +8,7 @@ import subprocess
 from pathlib import Path
 from typing import Sequence
 
-from .manifest import Engine
+from .manifest import HardwareTarget
 
 
 class DockerError(RuntimeError):
@@ -16,7 +16,7 @@ class DockerError(RuntimeError):
 
 
 def compose(
-    engine: Engine,
+    target: HardwareTarget,
     arguments: Sequence[str],
     *,
     check: bool = True,
@@ -26,14 +26,14 @@ def compose(
         "docker",
         "compose",
         "--project-directory",
-        str(engine.directory),
+        str(target.directory),
         "-f",
-        str(engine.compose_file),
+        str(target.compose_file),
         *arguments,
     ]
     return run(
         command,
-        cwd=engine.directory,
+        cwd=target.directory,
         check=check,
         capture_output=capture_output,
     )
