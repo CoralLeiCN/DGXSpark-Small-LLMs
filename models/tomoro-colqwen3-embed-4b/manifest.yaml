@@ -1,0 +1,28 @@
+id: tomoro-colqwen3-embed-4b
+name: Tomoro ColQwen3 Embed 4B
+provider: TomoroAI
+task: multi-vector-embedding
+modalities: [text, image]
+
+model:
+  source: huggingface
+  repo: TomoroAI/tomoro-colqwen3-embed-4b
+  served_name: tomoro-colqwen3-embed-4b
+
+engines:
+  sglang:
+    targets:
+      dgx-spark:
+        status: experimental
+        image: dgxspark/tomoro-colqwen3-embed-4b-sglang:0.1.0
+        base_image: lmsysorg/sglang:dev-qwen38-27b-dflash2
+        base_image_env: SGLANG_BASE_IMAGE
+        compose: sglang/targets/dgx-spark/compose.yaml
+        port: 30001
+        host:
+          architectures: [aarch64, arm64]
+
+validation:
+  endpoint: /encode
+  input: "What is the capital of France?"
+  dimensions: 320
