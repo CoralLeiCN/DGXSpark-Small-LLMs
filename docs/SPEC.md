@@ -19,9 +19,9 @@ The repository should make it easy to:
 - build, start, stop, inspect, and validate a selected deployment pack
 - keep incompatible model, engine, architecture, and hardware runtimes isolated
 
-The initial catalog contains language models. The pack format should remain
-model-type neutral so qualified vision-language, embedding, OCR, parser, and
-other inference workloads can be added without renaming the project or CLI.
+The catalog includes generation and embedding models. The pack format remains
+model-type neutral so other qualified inference workloads can be added without
+renaming the project or CLI.
 Manifests describe `task` and `modalities` for non-generative packs. Existing
 language-model manifests default to `text-generation` and `[text]`. Embedding
 packs declare `embedding` (one vector, `/v1/embeddings`) or

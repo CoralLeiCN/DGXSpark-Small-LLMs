@@ -1,0 +1,28 @@
+id: qwen3-embedding-8b
+name: Qwen3 Embedding 8B
+provider: qwen
+task: embedding
+modalities: [text]
+
+model:
+  source: huggingface
+  repo: Qwen/Qwen3-Embedding-8B
+  served_name: qwen3-embedding-8b
+
+engines:
+  sglang:
+    targets:
+      dgx-spark:
+        status: experimental
+        image: dgxspark/qwen3-embedding-8b-sglang:0.1.0
+        base_image: lmsysorg/sglang:dev-qwen38-27b-dflash2
+        base_image_env: SGLANG_BASE_IMAGE
+        compose: sglang/targets/dgx-spark/compose.yaml
+        port: 30002
+        host:
+          architectures: [aarch64, arm64]
+
+validation:
+  endpoint: /v1/embeddings
+  input: "What is the capital of France?"
+  dimensions: 4096

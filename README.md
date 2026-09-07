@@ -6,9 +6,9 @@ single node or single GPU. The current recipes target NVIDIA DGX Spark. Each
 architecture, CUDA, PyTorch, SGLang, vLLM, and launch flags can be pinned
 independently.
 
-The initial catalog contains language models. The package format is intended to
-also support vision-language, embedding, OCR, parser, and other inference
-workloads as qualified recipes are implemented.
+The catalog includes language-generation packs, multimodal token embeddings,
+and dense text embeddings. Each pack selects validation appropriate to its
+task and declares its supported input modalities.
 
 Supported inference engines are limited to SGLang and vLLM.
 
@@ -98,6 +98,21 @@ An experimental SGLang pack for
 [`TomoroAI/tomoro-colqwen3-embed-4b`](https://huggingface.co/TomoroAI/tomoro-colqwen3-embed-4b)
 adds text/image token embeddings on DGX Spark. Live batching and text/image
 reference comparisons passed; see the [model recipe](models/tomoro-colqwen3-embed-4b/README.md).
+
+## Qwen3 Embedding 8B
+
+The SGLang pack for
+[`Qwen/Qwen3-Embedding-8B`](https://huggingface.co/Qwen/Qwen3-Embedding-8B)
+serves text embeddings on port 30002 with task-specific validation:
+
+```bash
+infer deploy qwen3-embedding-8b --target dgx-spark
+infer validate qwen3-embedding-8b --target dgx-spark
+infer stop qwen3-embedding-8b --target dgx-spark
+```
+
+See the [model recipe](models/qwen3-embedding-8b/README.md) for query formatting,
+Matryoshka dimensions, memory settings, and qualification results.
 
 ## Commands
 
