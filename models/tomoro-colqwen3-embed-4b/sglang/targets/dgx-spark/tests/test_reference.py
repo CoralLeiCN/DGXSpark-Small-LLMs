@@ -12,7 +12,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def test_text_and_image_match_reference():
+def test_text_and_image_match_reference(tmp_path):
     import base64
     import io
     import json
@@ -21,13 +21,31 @@ def test_text_and_image_match_reference():
     from PIL import Image, ImageDraw
     from transformers import AutoModel, AutoProcessor
     from huggingface_hub import snapshot_download
+    from pathlib import Path
+    import shutil
 
     snapshot = snapshot_download("TomoroAI/tomoro-colqwen3-embed-4b", revision="13517a29e8c5e408f7f2684337ed407df3acb212", local_files_only=True)
-    processor = AutoProcessor.from_pretrained(snapshot, trust_remote_code=True)
-    reference = AutoModel.from_pretrained(snapshot, trust_remote_code=True, dtype=torch.bfloat16, attn_implementation="sdpa").to("cuda").eval()
+    # Transformers resolves local source symlinks before following relative
+    # imports. Keep Python files together, without copying large weight files.
+    for source in Path(snapshot).iterdir():
+        if source.is_file():
+            destination = tmp_path / source.name
+            if source.suffix == ".py":
+                shutil.copy2(source, destination)
+            else:
+                destination.symlink_to(source)
+    processor = AutoProcessor.from_pretrained(tmp_path, trust_remote_code=True)
+    reference = AutoModel.from_pretrained(tmp_path, trust_remote_code=True, dtype=torch.bfloat16, attn_implementation="sdpa").to("cuda").eval()
     picture = Image.new("RGB", (256, 256), "white")
     ImageDraw.Draw(picture).text((20, 80), "PARIS\nCapital of France", fill="black", font_size=20)
     cases = [processor.process_texts(["What is the capital of France?"]), processor.process_images([picture])]
+    native_processor = AutoProcessor.from_pretrained("/opt/inferpack/model")
+    native_image = native_processor(
+        text=processor.visual_prompt_prefix + processor.visual_prompt_suffix,
+        images=picture, return_tensors="pt",
+    )
+    for key in ("input_ids", "image_grid_thw", "pixel_values"):
+        assert torch.equal(native_image[key], cases[1][key]), key
     raw = io.BytesIO()
     picture.save(raw, format="PNG")
     image_data = "data:image/png;base64," + base64.b64encode(raw.getvalue()).decode()

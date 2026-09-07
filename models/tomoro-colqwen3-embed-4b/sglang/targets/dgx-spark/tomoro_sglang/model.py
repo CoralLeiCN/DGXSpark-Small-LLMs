@@ -5,10 +5,21 @@ uses its native multimodal processor and MRoPE handling. This package replaces
 that registry entry only inside this model's container.
 """
 import torch
+from types import MethodType
 from torch import nn
+from transformers.vision_utils import get_vision_bilinear_indices_and_weights
 from sglang.srt.layers.pooler import EmbeddingPoolerOutput
 from sglang.srt.model_loader.weight_utils import default_weight_loader
 from sglang.srt.models.qwen3_vl import Qwen3VLForConditionalGeneration as Backbone
+
+
+def reference_position_embeddings(vision, grid_thw):
+    """Keep interpolation weights/accumulation in FP32, like Transformers."""
+    grid = torch.tensor(grid_thw, device=vision.device, dtype=torch.long)
+    indices, weights = get_vision_bilinear_indices_and_weights(
+        grid, vision.num_grid_per_side, vision.spatial_merge_size
+    )
+    return (vision.pos_embed(indices) * weights[:, :, None]).sum(0).to(vision.dtype)
 
 
 class TokenProjection(nn.Module):
@@ -35,6 +46,9 @@ class Qwen3VLForConditionalGeneration(Backbone):
             raise ValueError("This pack requires Tomoro's 320-dimensional head")
         super().__init__(config, quant_config, prefix)
         self.pooler = TokenProjection(config.text_config.hidden_size, config.embed_dim)
+        self.visual.fast_pos_embed_interpolate_from_list = MethodType(
+            reference_position_embeddings, self.visual
+        )
 
     def forward(self, *args, get_embedding=True, **kwargs):
         if not get_embedding:

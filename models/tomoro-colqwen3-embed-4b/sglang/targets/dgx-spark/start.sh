@@ -8,7 +8,7 @@ args=(
   --host 0.0.0.0 --port "${SGLANG_CONTAINER_PORT:-30000}"
   --is-embedding --dtype bfloat16 --tp 1
   --context-length "${CONTEXT_LENGTH:-8192}"
-  --mem-fraction-static "${MEM_FRACTION_STATIC:-0.35}"
+  --mem-fraction-static "${MEM_FRACTION_STATIC:-0.25}"
   --max-running-requests "${MAX_RUNNING_REQUESTS:-2}"
   --attention-backend triton --mm-attention-backend sdpa
   --disable-radix-cache --chunked-prefill-size -1 --disable-cuda-graph

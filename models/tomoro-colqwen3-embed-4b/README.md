@@ -1,8 +1,13 @@
 # Tomoro ColQwen3 Embed 4B
 
 SGLang pack for `TomoroAI/tomoro-colqwen3-embed-4b` on NVIDIA DGX Spark.
-Status: **experimental, GPU qualification pending**. Container build and
-configuration/processor loading have passed; live inference is not yet verified.
+Status: **experimental; text/image qualified on DGX Spark on 2026-09-07**.
+Docker build, health, live unequal-length batching, and comparison against the
+original Transformers checkpoint passed. Text vectors had mean/minimum cosine
+0.999651/0.999368; image vectors had 0.997614/0.967261 on a generated 256×256
+fixture. Input tokens, image grid, and pixel tensors matched exactly. This is
+smoke-test qualification, not a retrieval benchmark or video qualification.
+The service was tested alongside Qwen3.8 at its reduced 0.45 allocation.
 
 ## Deployment
 
@@ -15,7 +20,8 @@ INFERPACK_LIVE_TESTS=1 uv run --python 3.12 pytest models/tomoro-colqwen3-embed-
 uv run --python 3.12 infer stop tomoro-colqwen3-embed-4b --engine sglang --target dgx-spark
 ```
 
-Use a free GPU with sufficient unified memory. Defaults reserve 35% of device
+Use a GPU with sufficient free unified memory. The host API uses port 30001
+to coexist with Qwen3.8 on port 30000. Defaults reserve 25% of device
 memory, limit context to 8,192 tokens, and permit two concurrent requests.
 Export overrides from the target's [environment example](sglang/targets/dgx-spark/.env.example)
 in the invoking shell. The image uses Python 3.12 and keeps all serving
@@ -39,7 +45,7 @@ import urllib.request
 
 body = {"text": "What is the capital of France?" + "<|endoftext|>" * 10}
 request = urllib.request.Request(
-    "http://localhost:30000/encode",
+    "http://localhost:30001/encode",
     data=json.dumps(body).encode(),
     headers={"Content-Type": "application/json"},
 )
@@ -54,6 +60,9 @@ data URI:
 <|im_start|>user
 <|vision_start|><|image_pad|><|vision_end|>Describe the image.<|im_end|><|endoftext|>
 ```
+
+Start other GPU services first and wait for readiness before deploying this
+pack; overlapping weight allocation can distort SGLang's memory profiling.
 
 Images retain the checkpoint's pixel limits (up to 1,280 visual tokens).
 PDFs must be rendered to images by the caller. Video is outside this pack's
@@ -73,8 +82,10 @@ all token vectors. SGLang still executes the vision and language backbones.
 configuration view compatible with the native Qwen3-VL processor. Weight files
 are symlinked from the shared Hugging Face cache; cached files are never edited.
 Prefix caching and chunked prefill are disabled so every input token retains an
-output vector. The launch uses BF16, Triton language attention, and SDPA vision
-attention. This extension is tied to the selected image; changing SGLang requires
+output vector. Vision-position interpolation retains FP32 weights and accumulation to match
+the reference implementation; the image's vectorized/graph vision paths are
+disabled so they cannot bypass this correction. The launch uses BF16 model
+weights, Triton language attention, and SDPA vision attention. This extension is tied to the selected image; changing SGLang requires
 requalification.
 
 The reference test loads the original checkpoint in Transformers alongside the

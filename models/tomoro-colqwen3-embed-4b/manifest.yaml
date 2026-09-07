@@ -18,7 +18,7 @@ engines:
         base_image: lmsysorg/sglang:dev-qwen38-27b-dflash2
         base_image_env: SGLANG_BASE_IMAGE
         compose: sglang/targets/dgx-spark/compose.yaml
-        port: 30000
+        port: 30001
         host:
           architectures: [aarch64, arm64]
 

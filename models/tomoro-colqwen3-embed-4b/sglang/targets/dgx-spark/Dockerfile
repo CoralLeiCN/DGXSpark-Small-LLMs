@@ -4,7 +4,9 @@ FROM ${BASE_IMAGE}
 ENV HF_HOME=/root/.cache/huggingface \
     CUDA_HOME=/usr/local/cuda \
     PYTHONPATH=/opt/inferpack \
-    SGLANG_EXTERNAL_MODEL_PACKAGE=tomoro_sglang
+    SGLANG_EXTERNAL_MODEL_PACKAGE=tomoro_sglang \
+    SGLANG_VIT_ENABLE_CUDA_GRAPH=0 \
+    SGLANG_VIT_ENABLE_VECTORIZED_POS_EMBED=0
 WORKDIR /opt/inferpack
 COPY start.sh prepare_model.py ./
 COPY tomoro_sglang ./tomoro_sglang

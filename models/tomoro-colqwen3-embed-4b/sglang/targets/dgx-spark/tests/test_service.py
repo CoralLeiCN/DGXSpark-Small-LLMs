@@ -37,7 +37,7 @@ def test_embedding_validation_uses_native_payload(monkeypatch):
 @pytest.mark.skipif(os.environ.get("INFERPACK_LIVE_TESTS") != "1", reason="requires running Tomoro service")
 def test_live_text_embeddings_and_batch_isolation():
     manifest = load_manifest(MODEL, ROOT)
-    port = int(os.environ.get("SGLANG_PORT", "30000"))
+    port = int(os.environ.get("SGLANG_PORT", "30001"))
     _validate(manifest, port, 300)
     url = f"http://127.0.0.1:{port}/encode"
     texts = ["Paris is the capital of France.", "A much shorter query."]
