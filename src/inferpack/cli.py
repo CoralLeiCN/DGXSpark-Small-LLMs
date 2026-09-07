@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import platform
 import shutil
@@ -335,11 +336,60 @@ def _effective_port(engine_name: str, default: int) -> int:
 
 
 def _validate(manifest: ModelManifest, port: int, timeout: float) -> None:
+    if manifest.task in {"embedding", "multi-vector-embedding"}:
+        _validate_embeddings(manifest, port, timeout)
+        return
     if manifest.validation_endpoint == "/v1/responses":
         _validate_responses(manifest, port, timeout)
         return
 
     _validate_chat(manifest, port, timeout)
+
+
+def _check_embedding_vectors(vectors: object, dimensions: int) -> int:
+    if not isinstance(vectors, list) or not vectors:
+        raise RuntimeError("Expected a non-empty list of embedding vectors")
+    for vector in vectors:
+        if not isinstance(vector, list) or len(vector) != dimensions:
+            raise RuntimeError(f"Expected {dimensions}-dimensional embedding vectors")
+        if any(
+            isinstance(x, bool)
+            or not isinstance(x, (int, float))
+            or not math.isfinite(x)
+            for x in vector
+        ):
+            raise RuntimeError("Embedding contains non-finite or non-numeric values")
+        norm = math.sqrt(sum(x * x for x in vector))
+        if not math.isclose(norm, 1.0, abs_tol=0.02):
+            raise RuntimeError(f"Expected normalized embedding, received norm {norm:.6f}")
+    return len(vectors)
+
+
+def _validate_embeddings(manifest: ModelManifest, port: int, timeout: float) -> None:
+    multi = manifest.task == "multi-vector-embedding"
+    body = {"text": manifest.validation_prompt} if multi else {
+        "model": manifest.served_name,
+        "input": manifest.validation_prompt,
+        "encoding_format": "float",
+    }
+    payload = _post_json(
+        f"http://127.0.0.1:{port}{manifest.validation_endpoint}", body, timeout
+    )
+    try:
+        if multi:
+            vectors = payload["embedding"]
+        else:
+            data = payload["data"]
+            if len(data) != 1 or data[0]["index"] != 0:
+                raise ValueError("Expected one embedding at index zero")
+            vectors = [data[0]["embedding"]]
+    except (KeyError, IndexError, TypeError, ValueError) as exc:
+        raise RuntimeError("Unexpected embedding response structure") from exc
+    count = _check_embedding_vectors(vectors, manifest.embedding_dimensions)
+    print(
+        f"Validated {count} normalized vector(s), "
+        f"{manifest.embedding_dimensions} dimensions each"
+    )
 
 
 def _validate_chat(manifest: ModelManifest, port: int, timeout: float) -> None:
@@ -378,6 +428,10 @@ def _validate_chat(manifest: ModelManifest, port: int, timeout: float) -> None:
 
 
 def _validate_responses(manifest: ModelManifest, port: int, timeout: float) -> None:
+    if manifest.task != "text-generation":
+        raise ValueError(
+            "Responses validation requires a text-generation model; use infer validate"
+        )
     url = f"http://127.0.0.1:{port}/v1/responses"
     body = {
         "model": manifest.served_name,

@@ -36,26 +36,33 @@ service health.
 
 ## Configuration
 
-Copy `sglang/targets/dgx-spark/.env.example` to
-`sglang/targets/dgx-spark/.env`, or export individual values before running a
-script.
+Export values from `sglang/targets/dgx-spark/.env.example` in the invoking
+shell before running a script.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `SGLANG_BASE_IMAGE` | `lmsysorg/sglang:dev-qwen38-27b-dflash2` | Qwen3.8-capable official SGLang image |
 | `SGLANG_PORT` | `30000` | Host API port |
 | `CONTEXT_LENGTH` | `32768` | Initial qualification context limit |
-| `MEM_FRACTION_STATIC` | `0.80` | Unified-memory fraction for model and runtime caches |
+| `MEM_FRACTION_STATIC` | `0.45` | Unified-memory fraction for model and runtime caches |
 | `MAX_RUNNING_REQUESTS` | `4` | Scheduler concurrency cap |
 | `MAX_MAMBA_CACHE_SIZE` | `16` | Four GDN state slots per request with `extra_buffer_lazy` |
 | `CHUNKED_PREFILL_SIZE` | `2048` | Prefill chunk size chosen to avoid long decode stalls |
 | `HF_CACHE_DIR` | `$HOME/.cache/huggingface` | Persistent model cache |
 | `SGLANG_EXTRA_ARGS` | unset | Additional model-specific launch arguments |
 
-DGX Spark's 128 GB is unified with the host. SGLang's Qwen3.8 cookbook reports
-that `--mem-fraction-static 0.85` can cross the operating system's early-OOM
-threshold, while `0.80` completed its DGX Spark boot-and-serve matrix. This
-recipe therefore uses `0.80`; it is not a hard container memory limit.
+DGX Spark's 128 GB is unified with the host. The default static allocation
+fraction is `0.45` to leave room for a separate embedding service and the host.
+This reduces cache capacity compared with the earlier `0.80` standalone
+configuration. It is an SGLang allocation target, not a hard container RAM
+limit; activations and other services also consume unified memory. Keep the
+32K context and four-request limits unless workload validation justifies
+changing them. Export `MEM_FRACTION_STATIC=0.80` only when dedicating the host
+to this service and after checking available memory.
+
+Start Qwen3.8 first and wait for readiness before starting another GPU service.
+SGLang profiles free memory around weight loading, so concurrent startup can
+charge another service's allocations against this model's cache budget.
 
 Qwen3.8 is a hybrid Gated DeltaNet model, so the GDN state cache must be sized
 alongside the paged attention KV cache. With the `extra_buffer_lazy` strategy,
