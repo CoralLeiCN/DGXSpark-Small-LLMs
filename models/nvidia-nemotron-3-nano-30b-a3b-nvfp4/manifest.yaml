@@ -1,0 +1,26 @@
+id: nvidia-nemotron-3-nano-30b-a3b-nvfp4
+name: NVIDIA Nemotron 3 Nano 30B A3B NVFP4
+provider: nvidia
+
+model:
+  source: huggingface
+  repo: nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-NVFP4
+  served_name: nemotron-3-nano
+
+engines:
+  sglang:
+    targets:
+      dgx-spark:
+        status: experimental
+        image: dgxspark/nemotron-3-nano-30b-a3b-nvfp4-sglang:0.1.0
+        base_image: nvcr.io/nvidia/pytorch:26.02-py3
+        base_image_env: NVIDIA_PYTORCH_IMAGE
+        compose: sglang/targets/dgx-spark/compose.yaml
+        port: 30000
+        host:
+          architectures: [aarch64, arm64]
+
+validation:
+  endpoint: /v1/chat/completions
+  prompt: Write a short haiku about GPUs.
+  max_tokens: 512

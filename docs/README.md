@@ -2,25 +2,29 @@
 
 This repository is a container-first catalog of hardware-targeted inference
 packs for running AI models on a single node or single GPU. The current packs
-target NVIDIA DGX Spark.
+target NVIDIA DGX Spark; other hardware is represented by additional explicit
+targets when qualified recipes are implemented.
 
 See [SPEC.md](SPEC.md) for the current architecture spec and
 [experiments/README.md](experiments/README.md) for the failed-run journal guide
-and model-engine journals.
+and deployment-pack journals.
 
 The important rule:
 
-> Each `model + engine` pair owns its own Docker environment.
+> Each `model + engine + hardware target` pack owns its Docker environment.
 
-That matters because different models may need different CUDA, PyTorch, vLLM, SGLang, tokenizer, and quantization versions. The host Python environment should only run lightweight repo tooling.
+That matters because CPU architecture, GPU memory topology, CUDA, PyTorch,
+vLLM, SGLang, tokenizer, quantization, and launch settings can differ between
+models and hardware. The host Python environment should only run lightweight
+repository tooling.
 
 ## Documentation Approach
 
 Keep documentation proportional to implemented behavior. Record architecture,
 assumptions, and tradeoffs in the spec before implementing or changing a
-significant design. Add model-, engine-, and troubleshooting-specific material
-when the corresponding recipe or observed behavior exists instead of writing
-speculative documentation in advance.
+significant design. Add model-, engine-, hardware-, and troubleshooting-specific
+material when the corresponding recipe or observed behavior exists instead of
+writing speculative documentation in advance.
 
 When user feedback changes a requirement or architectural direction, update the
 authoritative spec, guide, or model documentation directly. Do not maintain a
@@ -33,7 +37,7 @@ Only these inference engines are in scope for now:
 - vLLM
 - SGLang
 
-## Minimal Layout
+## Layout
 
 ```text
 DGXSpark-Small-LLMs/
@@ -52,104 +56,123 @@ DGXSpark-Small-LLMs/
 |       |-- manifest.py
 |       `-- docker.py
 |-- models/
-|   `-- <provider>/
-|       `-- <model>/
-|           |-- manifest.yaml
-|           |-- README.md
-|           |-- vllm/
-|           |   |-- Dockerfile
-|           |   |-- compose.yaml
-|           |   |-- start.sh
-|           |   |-- .env.example
-|           |   `-- tests/
-|           `-- sglang/
-|               |-- Dockerfile
-|               |-- compose.yaml
-|               |-- start.sh
-|               |-- .env.example
-|               `-- tests/
+|   `-- <model>/
+|       |-- manifest.yaml
+|       |-- README.md
+|       |-- vllm/
+|       |   `-- targets/
+|       |       `-- <hardware>/
+|       |           |-- Dockerfile
+|       |           |-- compose.yaml
+|       |           |-- start.sh
+|       |           |-- .env.example
+|       |           `-- tests/
+|       `-- sglang/
+|           `-- targets/
+|               `-- <hardware>/
+|                   |-- Dockerfile
+|                   |-- compose.yaml
+|                   |-- start.sh
+|                   |-- .env.example
+|                   `-- tests/
 `-- docs/
     |-- README.md
     `-- experiments/
         |-- README.md
-        `-- <provider>/<model>/<engine>/
+        `-- <model>/<engine>/<hardware>/
             |-- README.md
             `-- <timestamp>-<slug>.md
 ```
 
-Do not add global vLLM or SGLang installs for serving. The shared Python package should only find models, read manifests, and run Docker commands.
+Model directory names and manifest IDs are globally unique slugs. Provider
+identity remains explicit manifest metadata and remains part of upstream source
+repository IDs. Add a provider or brand to the model slug only when it is useful
+for recognition or uniqueness.
+
+Do not create empty target directories for unsupported combinations. A target
+directory means that a concrete deployment pack exists, and its target-level
+status communicates the current qualification state.
+
+Do not add global vLLM or SGLang installs for serving. The shared Python package
+should only find models, read manifests, resolve a deployment target, run Docker
+commands, and perform basic validation.
 
 ## Command Shape
 
-Top-level scripts should be thin wrappers around the Python CLI:
+Top-level scripts are thin wrappers around the Python CLI:
 
 ```bash
 scripts/models
-scripts/build nvidia/nemotron-3-super-120b-a12b --engine vllm
-scripts/serve nvidia/nemotron-3-super-120b-a12b --engine vllm
-scripts/logs nvidia/nemotron-3-super-120b-a12b --engine vllm
-scripts/validate nvidia/nemotron-3-super-120b-a12b --engine vllm
-scripts/validate-responses nvidia/nemotron-3-super-120b-a12b --engine vllm
-scripts/stop nvidia/nemotron-3-super-120b-a12b --engine vllm
+scripts/build gemma-4-e4b-it --engine sglang --target dgx-spark
+scripts/serve gemma-4-e4b-it --engine sglang --target dgx-spark
+scripts/logs gemma-4-e4b-it --engine sglang --target dgx-spark
+scripts/validate gemma-4-e4b-it --engine sglang --target dgx-spark
+scripts/stop gemma-4-e4b-it --engine sglang --target dgx-spark
 ```
 
-Each script can simply call:
+Each script calls:
 
 ```bash
 uv run --python 3.12 infer <command> "$@"
 ```
 
-The CLI should then run Docker Compose from the selected model engine directory.
+The CLI runs Docker Compose from the selected target directory. Target
+selection is explicit; InferPack does not silently choose a recipe from the
+detected GPU.
 
-## Minimal Manifest
+## Manifest
 
-Each model should have:
+Each model has one manifest at:
 
 ```text
-models/<provider>/<model>/manifest.yaml
+models/<model>/manifest.yaml
 ```
 
 Example:
 
 ```yaml
-id: nvidia/nemotron-3-super-120b-a12b
-name: Nemotron 3 Super 120B A12B
-provider: nvidia
-status: experimental
+id: gemma-4-e4b-it
+name: Gemma 4 E4B IT
+provider: google
 
 model:
   source: huggingface
-  repo: nvidia/REPLACE_WITH_REAL_REPO
-  local_path: /models/nemotron-3-super-120b-a12b
-  served_name: nemotron-3-super-120b-a12b
+  repo: google/gemma-4-E4B-it
+  served_name: gemma-4-e4b-it
 
 engines:
-  vllm:
-    enabled: true
-    image: dgxspark/nemotron-3-super-120b-a12b-vllm:0.1.0
-    compose: vllm/compose.yaml
-    port: 8000
-
   sglang:
-    enabled: false
-    image: dgxspark/nemotron-3-super-120b-a12b-sglang:0.1.0
-    compose: sglang/compose.yaml
-    port: 30000
+    targets:
+      dgx-spark:
+        status: experimental
+        image: dgxspark/gemma-4-e4b-it-sglang:0.1.0
+        base_image: lmsysorg/sglang:dev-qwen38-27b-dflash2
+        base_image_env: SGLANG_BASE_IMAGE
+        compose: sglang/targets/dgx-spark/compose.yaml
+        port: 30000
+        host:
+          architectures: [aarch64, arm64]
 
 validation:
-  endpoint: /v1/responses
-  prompt: Explain tensor parallelism in one paragraph.
+  endpoint: /v1/chat/completions
+  prompt: Reply with exactly this text and nothing else: ready
   max_tokens: 128
 ```
 
-## Add A Model
+## Add A Model Or Target
 
-For each new model:
+1. Choose a globally unique model slug and create `models/<model>/` if needed.
+2. Add or update the model-level `manifest.yaml` and `README.md`.
+3. Add `<engine>/targets/<hardware>/` only for the engine and hardware being
+   implemented.
+4. Put the target's Dockerfile, Compose file, startup script, environment
+   example, and service tests in that directory.
+5. Pin runtime versions inside the target Dockerfile and keep model- and
+   hardware-specific launch defaults inside the target pack.
+6. Add the target under the matching manifest engine with its host constraints
+   and qualification status.
+7. Start its append-only journal at
+   `docs/experiments/<model>/<engine>/<hardware>/` when experiments begin.
 
-1. Create `models/<provider>/<model>/`.
-2. Add `manifest.yaml`.
-3. Add a short model `README.md`.
-4. Add `vllm/` and/or `sglang/` only when that engine is being tried.
-5. Pin runtime versions inside that engine Dockerfile.
-6. Keep model-specific launch flags inside that engine `start.sh` or `.env.example`.
-7. Mark untested entries as `experimental`.
+Hardware slugs should describe a reproducible class, such as `dgx-spark` or
+`rtx-4080-16gb`, rather than an ambiguous marketing family.

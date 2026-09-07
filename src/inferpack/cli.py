@@ -68,12 +68,17 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _add_model_arguments(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("model", help="Model id in <provider>/<model> form.")
+    parser.add_argument("model", help="Globally unique model slug.")
     parser.add_argument(
         "--engine",
         choices=("sglang", "vllm"),
         default="sglang",
         help="Inference engine (default: sglang).",
+    )
+    parser.add_argument(
+        "--target",
+        required=True,
+        help="Hardware target defined by the selected model and engine.",
     )
 
 
@@ -86,38 +91,49 @@ def main(argv: list[str] | None = None) -> int:
 
         manifest = load_manifest(args.model)
         engine = manifest.engine(args.engine)
+        target = engine.target(args.target)
 
         if args.command == "build":
-            docker.compose(engine, ["build"])
+            docker.compose(target, ["build"])
         elif args.command == "serve":
-            docker.compose(engine, ["up", "-d", "--no-build"])
+            docker.compose(target, ["up", "-d", "--no-build"])
         elif args.command == "deploy":
-            _preflight(manifest, args.engine, skip_gpu_check=False)
-            docker.compose(engine, ["build"])
-            docker.compose(engine, ["up", "-d", "--no-build"])
+            _preflight(
+                manifest,
+                args.engine,
+                args.target,
+                skip_gpu_check=False,
+            )
+            docker.compose(target, ["build"])
+            docker.compose(target, ["up", "-d", "--no-build"])
         elif args.command == "stop":
-            docker.compose(engine, ["down"])
+            docker.compose(target, ["down"])
         elif args.command == "logs":
             command = ["logs"]
             if not args.no_follow:
                 command.extend(["--follow", "--tail", "100"])
-            docker.compose(engine, command)
+            docker.compose(target, command)
         elif args.command == "status":
-            docker.compose(engine, ["ps"])
+            docker.compose(target, ["ps"])
         elif args.command == "validate":
             _validate(
                 manifest,
-                _effective_port(engine.name, engine.port),
+                _effective_port(engine.name, target.port),
                 args.timeout,
             )
         elif args.command == "validate-responses":
             _validate_responses(
                 manifest,
-                _effective_port(engine.name, engine.port),
+                _effective_port(engine.name, target.port),
                 args.timeout,
             )
         elif args.command == "preflight":
-            _preflight(manifest, args.engine, args.skip_gpu_check)
+            _preflight(
+                manifest,
+                args.engine,
+                args.target,
+                args.skip_gpu_check,
+            )
         return 0
     except (docker.DockerError, ManifestError, OSError, RuntimeError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -133,12 +149,17 @@ def _list_models() -> None:
     rows = [
         (
             manifest.identifier,
-            ",".join(sorted(manifest.engines)),
+            manifest.provider,
+            engine.name,
+            target.name,
+            target.status,
             manifest.served_name,
         )
         for manifest in manifests
+        for engine in manifest.engines.values()
+        for target in engine.targets.values()
     ]
-    headers = ("MODEL", "ENGINES", "SERVED NAME")
+    headers = ("MODEL", "PROVIDER", "ENGINE", "TARGET", "STATUS", "SERVED NAME")
     widths = [
         max(len(header), *(len(row[index]) for row in rows))
         for index, header in enumerate(headers)
@@ -158,15 +179,23 @@ def _list_models() -> None:
 
 
 def _preflight(
-    manifest: ModelManifest, engine_name: str, skip_gpu_check: bool
+    manifest: ModelManifest,
+    engine_name: str,
+    target_name: str,
+    skip_gpu_check: bool,
 ) -> None:
     engine = manifest.engine(engine_name)
+    target = engine.target(target_name)
     failures: list[str] = []
     warnings: list[str] = []
 
     machine = platform.machine().lower()
-    if machine not in {"aarch64", "arm64"}:
-        warnings.append(f"host architecture is {machine}, not DGX Spark ARM64")
+    if machine not in target.host_architectures:
+        expected = ", ".join(target.host_architectures)
+        raise RuntimeError(
+            f"host architecture {machine!r} is incompatible with target "
+            f"{target.name!r}; expected one of: {expected}"
+        )
 
     available, detail = docker.docker_available()
     if available:
@@ -190,9 +219,9 @@ def _preflight(
             "less than 40 GiB is free for image layers and model weights"
         )
 
-    base_image = engine.base_image
-    if engine.base_image_env:
-        base_image = os.environ.get(engine.base_image_env, base_image)
+    base_image = target.base_image
+    if target.base_image_env:
+        base_image = os.environ.get(target.base_image_env, base_image)
 
     if base_image:
         if docker.image_exists(base_image):
