@@ -22,9 +22,14 @@ The repository should make it easy to:
 The initial catalog contains language models. The pack format should remain
 model-type neutral so qualified vision-language, embedding, OCR, parser, and
 other inference workloads can be added without renaming the project or CLI.
-Before the first non-generative pack is added, the manifest must evolve to
-describe its task and modalities and select task-specific validation instead of
-forcing embedding, OCR, or parser services through chat-oriented fields.
+Manifests describe `task` and `modalities` for non-generative packs. Existing
+language-model manifests default to `text-generation` and `[text]`. Embedding
+packs declare `embedding` (one vector, `/v1/embeddings`) or
+`multi-vector-embedding` (token vectors, `/encode`), with `validation.input` and
+positive `validation.dimensions`. Validation checks finite, normalized vectors
+of the declared dimension; model-local service tests establish numerical and
+retrieval correctness. Generation packs continue to use `validation.prompt`
+and `validation.max_tokens`. Incompatible task/endpoint pairs are rejected.
 
 ## Supported Inference Engines
 

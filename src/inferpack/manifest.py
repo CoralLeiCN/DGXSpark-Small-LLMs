@@ -55,6 +55,9 @@ class ModelManifest:
     validation_max_tokens: int
     path: Path
     engines: dict[str, Engine]
+    task: str = "text-generation"
+    modalities: tuple[str, ...] = ("text",)
+    embedding_dimensions: int | None = None
 
     def engine(self, name: str) -> Engine:
         try:
@@ -154,19 +157,48 @@ def load_manifest(identifier: str, root: Path | None = None) -> ModelManifest:
     if not engines:
         raise ManifestError(f"No engines are defined in {path}")
 
+    task = data.get("task", "text-generation")
+    if task not in {"text-generation", "embedding", "multi-vector-embedding"}:
+        raise ManifestError(f"Unsupported model task: {task!r}")
+    modalities = (
+        _required_string_tuple(data, "modalities")
+        if "modalities" in data
+        else ("text",)
+    )
+    endpoint = _required_string(validation, "endpoint")
+    endpoints = {
+        "text-generation": {"/v1/chat/completions", "/v1/responses"},
+        "embedding": {"/v1/embeddings"},
+        "multi-vector-embedding": {"/encode"},
+    }
+    if endpoint not in endpoints[task]:
+        raise ManifestError(
+            f"Endpoint {endpoint!r} is incompatible with task {task!r}"
+        )
+    dimensions = None
+    if task != "text-generation":
+        dimensions = _required_int(validation, "dimensions")
+        if dimensions < 1:
+            raise ManifestError("Embedding dimensions must be positive")
+
     return ModelManifest(
         identifier=manifest_id,
         name=_required_string(data, "name"),
         provider=_required_string(data, "provider"),
         model_repo=_required_string(model, "repo"),
         served_name=_required_string(model, "served_name"),
-        validation_endpoint=_required_string(validation, "endpoint"),
-        validation_prompt=_required_string(validation, "prompt"),
+        validation_endpoint=endpoint,
+        validation_prompt=_required_string(
+            validation, "prompt" if task == "text-generation" else "input"
+        ),
         validation_max_tokens=_optional_positive_int(
             validation, "max_tokens", default=128
         ),
         path=path,
         engines=engines,
+        task=task,
+        modalities=modalities,
+        embedding_dimensions=dimensions,
     )
 
 

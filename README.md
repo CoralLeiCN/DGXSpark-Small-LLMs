@@ -92,6 +92,13 @@ infer stop qwen3.8-27b-fp8 --engine sglang --target dgx-spark
 See the [model recipe](models/qwen3.8-27b-fp8/README.md) for the DGX
 Spark memory assumptions and configuration controls.
 
+## Tomoro ColQwen3 Embed 4B
+
+An experimental SGLang pack for
+[`TomoroAI/tomoro-colqwen3-embed-4b`](https://huggingface.co/TomoroAI/tomoro-colqwen3-embed-4b)
+adds text/image token embeddings on DGX Spark. GPU qualification is pending;
+see the [model recipe](models/tomoro-colqwen3-embed-4b/README.md).
+
 ## Commands
 
 The Python 3.12 CLI runs through `uv`:
