@@ -48,6 +48,7 @@ DGXSpark-Small-LLMs/
 |   |-- serve
 |   |-- stop
 |   |-- logs
+|   |-- services
 |   |-- validate
 |   `-- validate-responses
 |-- src/
@@ -103,6 +104,7 @@ Top-level scripts are thin wrappers around the Python CLI:
 
 ```bash
 scripts/models
+scripts/services
 scripts/build gemma-4-e4b-it --engine sglang --target dgx-spark
 scripts/serve gemma-4-e4b-it --engine sglang --target dgx-spark
 scripts/logs gemma-4-e4b-it --engine sglang --target dgx-spark

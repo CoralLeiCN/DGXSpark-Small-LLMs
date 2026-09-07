@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -37,6 +38,67 @@ def compose(
         check=check,
         capture_output=capture_output,
     )
+
+
+def compose_ps(target: HardwareTarget, *, include_all: bool = False) -> list[dict]:
+    arguments = ["ps", "--format", "json", "--no-trunc"]
+    arguments.extend(["--all"] if include_all else ["--status", "running"])
+    result = compose(target, arguments, check=False, capture_output=True)
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout).strip()
+        raise DockerError(
+            f"Cannot list containers for {target.compose_file}: "
+            f"{detail or f'Docker Compose exited with code {result.returncode}'}"
+        )
+
+    output = result.stdout.strip()
+    if not output:
+        return []
+    try:
+        # Older Compose releases emit an array; current releases use JSON Lines.
+        containers = (
+            json.loads(output)
+            if output.startswith("[")
+            else [json.loads(line) for line in output.splitlines() if line.strip()]
+        )
+    except json.JSONDecodeError as exc:
+        raise DockerError(
+            f"Invalid Docker Compose JSON for {target.compose_file}"
+        ) from exc
+    if not isinstance(containers, list) or any(
+        not isinstance(container, dict)
+        or any(
+            not isinstance(container.get(field), str)
+            for field in ("ID", "Name", "Service", "State")
+        )
+        for container in containers
+    ):
+        raise DockerError(
+            f"Unexpected Docker Compose output for {target.compose_file}"
+        )
+    if not containers:
+        return []
+
+    # A project-name override can make different packs query the same project.
+    # Only attribute containers created from this pack's directory and config.
+    owned = run(
+        [
+            "docker",
+            "container",
+            "ls",
+            "--all",
+            "--no-trunc",
+            "--filter",
+            f"label=com.docker.compose.project.working_dir={target.directory.resolve()}",
+            "--filter",
+            f"label=com.docker.compose.project.config_files={target.compose_file.resolve()}",
+            "--format",
+            "{{.ID}}",
+        ],
+        capture_output=True,
+    )
+    owned_ids = set(owned.stdout.splitlines())
+    return [container for container in containers if container["ID"] in owned_ids]
 
 
 def image_exists(image: str) -> bool:

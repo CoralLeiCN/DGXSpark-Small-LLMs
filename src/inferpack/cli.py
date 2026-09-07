@@ -32,6 +32,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="List the inference packs available in this repository.",
     )
 
+    services = subparsers.add_parser(
+        "services",
+        help="List running services across all inference packs.",
+    )
+    services.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        help="Include stopped containers.",
+    )
+
     for command in (
         "build",
         "serve",
@@ -88,6 +99,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "models":
             _list_models()
+            return 0
+        if args.command == "services":
+            _list_services(include_all=args.all)
             return 0
 
         manifest = load_manifest(args.model)
@@ -161,6 +175,62 @@ def _list_models() -> None:
         for target in engine.targets.values()
     ]
     headers = ("MODEL", "PROVIDER", "ENGINE", "TARGET", "STATUS", "SERVED NAME")
+    _print_table(headers, rows)
+
+
+def _list_services(*, include_all: bool) -> None:
+    rows = []
+    seen_ids: set[str] = set()
+    for manifest in discover_manifests():
+        for engine in manifest.engines.values():
+            for target in engine.targets.values():
+                containers = docker.compose_ps(target, include_all=include_all)
+                for container in sorted(containers, key=lambda item: item["Name"]):
+                    if container["ID"] in seen_ids:
+                        continue
+                    seen_ids.add(container["ID"])
+                    rows.append(
+                        (
+                            manifest.identifier,
+                            engine.name,
+                            target.name,
+                            container["Service"],
+                            container["Name"],
+                            container["State"],
+                            container.get("Health") or "-",
+                            _service_ports(container),
+                        )
+                    )
+
+    if not rows:
+        print(
+            "No service containers found."
+            if include_all
+            else "No running services found."
+        )
+        return
+
+    _print_table(
+        ("MODEL", "ENGINE", "TARGET", "SERVICE", "CONTAINER", "STATE", "HEALTH", "PORTS"),
+        rows,
+    )
+
+
+def _service_ports(container: dict) -> str:
+    ports = []
+    for publisher in container.get("Publishers") or []:
+        target = f"{publisher['TargetPort']}/{publisher['Protocol']}"
+        if publisher.get("PublishedPort"):
+            address = publisher.get("URL") or "0.0.0.0"
+            if ":" in address:
+                address = f"[{address}]"
+            ports.append(f"{address}:{publisher['PublishedPort']}->{target}")
+        else:
+            ports.append(target)
+    return ", ".join(ports) or "-"
+
+
+def _print_table(headers: tuple[str, ...], rows: list[tuple[str, ...]]) -> None:
     widths = [
         max(len(header), *(len(row[index]) for row in rows))
         for index, header in enumerate(headers)
