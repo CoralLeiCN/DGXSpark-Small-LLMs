@@ -6,9 +6,9 @@ Deployment recipe:
 Follow the [journal guide](../../../README.md). Each row links to one immutable
 experiment turn; later turns link back to the observations they continue.
 
-Runs recorded: 10
+Runs recorded: 11
 
-Next run ID: `RUN-0011`
+Next run ID: `RUN-0012`
 
 | Run ID | Time (UTC) | Status | Outcome |
 | --- | --- | --- | --- |
@@ -22,3 +22,4 @@ Next run ID: `RUN-0011`
 | `RUN-0008` | 2026-09-09T22:19:44Z | resolved | [Shared monitoring qualified; all ten panels passed](2026-09-09T22-19-44Z-shared-monitoring-qualified.md) |
 | `RUN-0009` | 2026-09-09T22:24:22Z | resolved | [Grafana remote access narrowed to Tailscale](2026-09-09T22-24-22Z-grafana-tailnet-access.md) |
 | `RUN-0010` | 2026-09-09T23:13:53Z | open | [Mixed stream modes expose dashboard aggregation gap](2026-09-09T23-13-53Z-mixed-stream-monitoring.md) |
+| `RUN-0011` | 2026-09-09T23:17:37Z | resolved | [Monitoring PR tests pass with mixed stream modes](2026-09-09T23-17-37Z-monitoring-pr-validation.md) |
