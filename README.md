@@ -126,6 +126,7 @@ The Python 3.12 CLI runs through `uv`:
 
 ```bash
 infer models
+infer services
 infer build <model> --engine sglang --target <hardware>
 infer serve <model> --engine sglang --target <hardware>
 infer deploy <model> --engine sglang --target <hardware>
@@ -142,6 +143,24 @@ provider metadata, qualification status, and the API-facing served name. Model
 identifiers are globally unique slugs; provider names remain manifest metadata
 and part of upstream repository identifiers. The matching top-level scripts
 remain available as thin convenience wrappers.
+
+`services` lists running containers across all inference packs in the repository,
+showing the model, engine, target, service, container name, state, health, and
+actual port bindings. No model or target selection is needed:
+
+```bash
+uv run --python 3.12 infer services
+uv run --python 3.12 infer services --all  # Include stopped containers.
+```
+
+`scripts/services` is the equivalent convenience wrapper. The command queries
+the current Docker daemon using each pack's Compose configuration; unrelated
+Docker projects are not included. A running container may still be loading its
+model, so check the health column and use `infer validate` to verify the API.
+Containers must have Compose ownership labels matching a current pack's paths;
+containers created from old recipe paths are omitted. A project-name override
+does not make the same container appear under multiple models.
+Containers removed by `infer stop` are no longer listed, even with `--all`.
 
 `deploy` runs preflight checks, builds the model image, and starts it in the
 background. Model downloads are stored in the host Hugging Face cache and are

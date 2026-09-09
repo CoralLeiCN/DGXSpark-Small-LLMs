@@ -134,6 +134,7 @@ inferpack/
 |   |-- stop
 |   |-- logs
 |   |-- status
+|   |-- services
 |   |-- validate
 |   `-- validate-responses
 |-- src/
@@ -282,6 +283,8 @@ The user explicitly selects the hardware recipe:
 
 ```bash
 scripts/models
+scripts/services
+scripts/services --all
 scripts/preflight <model> --engine sglang --target <hardware>
 scripts/build <model> --engine sglang --target <hardware>
 scripts/serve <model> --engine sglang --target <hardware>
@@ -307,6 +310,20 @@ models/gemma-4-e4b-it/sglang/targets/dgx-spark/
 
 `infer models` prints one row per implemented model, engine, and hardware
 target, including provider, target-level status, and served name.
+
+`infer services` discovers every pack in the repository and queries its Compose
+project on the current Docker daemon. It prints one row per running container,
+including model, engine, hardware target, service, container name, state, health,
+and actual port bindings. It needs no model or target arguments. `--all` also
+includes stopped containers; packs with no containers have no rows. This is a
+read-only snapshot of the repository's Compose projects, not a host-wide Docker
+inventory or an API readiness check. Project selection follows the same Compose
+configuration and environment as the lifecycle commands. Before attributing a
+container to a pack, its Compose working-directory and configuration-file labels
+must match that pack's current directory and single Compose file. Container IDs
+are deduplicated, so a shared `COMPOSE_PROJECT_NAME` cannot list one container
+under several models. Containers with missing or different ownership labels,
+including those created from a previous recipe path, are omitted.
 
 ## Shared Monitoring
 
