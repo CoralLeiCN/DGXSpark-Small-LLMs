@@ -1,0 +1,503 @@
+{
+  "uid": "inference-overview",
+  "title": "Inference overview",
+  "description": "Shared SGLang metrics, filtered by environment and model. Labels separate views, not permissions.",
+  "tags": [
+    "inferpack",
+    "sglang"
+  ],
+  "schemaVersion": 39,
+  "version": 3,
+  "editable": false,
+  "timezone": "browser",
+  "refresh": "15s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "environment",
+        "label": "Environment",
+        "type": "custom",
+        "query": "dev,prod",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": [
+          {
+            "text": "All",
+            "value": "$__all",
+            "selected": true
+          },
+          {
+            "text": "dev",
+            "value": "dev",
+            "selected": false
+          },
+          {
+            "text": "prod",
+            "value": "prod",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "name": "model",
+        "label": "Model",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(up{job=\"sglang\",environment=~\"$environment\"}, model)",
+        "query": {
+          "query": "label_values(up{job=\"sglang\",environment=~\"$environment\"}, model)",
+          "refId": "model-variable"
+        },
+        "refresh": 1,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": []
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Scrape status (1 = reachable)",
+      "type": "stat",
+      "description": "Reachability of /metrics, not an inference-readiness check.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}",
+          "legendFormat": "{{environment}} / {{model}} / {{instance}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Output tokens since engine restart",
+      "type": "stat",
+      "description": "Raw cumulative counter. Resets on engine restart; includes any tokens counted before Prometheus began scraping.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (environment, model, instance) (sglang:generation_tokens_total{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"})",
+          "legendFormat": "{{environment}} / {{model}} / {{instance}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Output tokens in selected range",
+      "type": "stat",
+      "description": "Prometheus estimate from collected samples, adjusted for observed counter resets. Cannot recover missing history; may be fractional.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(increase(sglang:generation_tokens_total{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}[$__range]))",
+          "legendFormat": "{{environment}} / {{model}} / {{instance}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Input tokens in selected range",
+      "type": "stat",
+      "description": "Input tokens counted by the engine; estimate over collected samples.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(increase(sglang:prompt_tokens_total{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}[$__range]))",
+          "legendFormat": "{{environment}} / {{model}} / {{instance}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Output throughput",
+      "type": "timeseries",
+      "description": "Service throughput across concurrent requests, averaged over the rate window including idle time. Requires at least two scrapes.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (environment, model, instance) (rate(sglang:generation_tokens_total{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}[$__rate_interval]))",
+          "legendFormat": "{{environment}} / {{model}} / {{instance}}",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:tokens/s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Input throughput",
+      "type": "timeseries",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (environment, model, instance) (rate(sglang:prompt_tokens_total{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}[$__rate_interval]))",
+          "legendFormat": "{{environment}} / {{model}} / {{instance}}",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:tokens/s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Running requests",
+      "type": "timeseries",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sglang:num_running_reqs{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}",
+          "legendFormat": "{{environment}} / {{model}} / {{instance}}",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Queued requests",
+      "type": "timeseries",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sglang:num_queue_reqs{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}",
+          "legendFormat": "{{environment}} / {{model}} / {{instance}}",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Time to first token (mean)",
+      "type": "timeseries",
+      "description": "No value when no request observations fall in the rate window. Combines stream modes by observation count; idle services have no latency value.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(sum by (environment, model, instance) (rate(sglang:time_to_first_token_seconds_sum{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}[$__rate_interval])) / sum by (environment, model, instance) (rate(sglang:time_to_first_token_seconds_count{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}[$__rate_interval]))) and (sum by (environment, model, instance) (rate(sglang:time_to_first_token_seconds_count{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}[$__rate_interval])) > 0)",
+          "legendFormat": "{{environment}} / {{model}} / {{instance}}",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Inter-token latency (mean)",
+      "type": "timeseries",
+      "description": "Mean interval between output tokens as reported by this SGLang runtime. No value when no observations fall in the rate window. Combines stream modes by observation count; idle services have no latency value.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(sum by (environment, model, instance) (rate(sglang:inter_token_latency_seconds_sum{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}[$__rate_interval])) / sum by (environment, model, instance) (rate(sglang:inter_token_latency_seconds_count{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}[$__rate_interval]))) and (sum by (environment, model, instance) (rate(sglang:inter_token_latency_seconds_count{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}[$__rate_interval])) > 0)",
+          "legendFormat": "{{environment}} / {{model}} / {{instance}}",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    }
+  ],
+  "annotations": {
+    "list": []
+  }
+}

@@ -48,6 +48,20 @@ The model supports a native 262,144-token context. The 32K default is a
 conservative initial operating point and should be increased only after
 workload-specific concurrency and host-memory validation.
 
+## Monitoring
+
+Set `SGLANG_EXTRA_ARGS="--enable-metrics"` in the target's local `.env` (or append
+the flag to existing extra arguments). Compose loads this file automatically;
+exported shell variables override it. The environment example enables metrics.
+Rerun `infer serve` with this model, engine, and target to apply the setting;
+the container is recreated and the model reloads.
+
+The [shared monitoring stack](../../monitoring/README.md) scrapes this service
+on port 30000 with `environment="dev"`, and provisions a Grafana dashboard for
+token counts, throughput, queue depth, and latency. Metric labels separate views
+within one shared stack. Change its target file when using a different host
+port or environment.
+
 ## Source Settings
 
 The launch command follows the official model card and SGLang cookbook:
