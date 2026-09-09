@@ -53,7 +53,7 @@ platform. The following remain out of scope:
 - llama.cpp
 - Kubernetes
 - multi-node orchestration
-- a web UI
+- a custom model-serving web UI (Grafana monitoring is supported)
 - a global Python environment that directly serves every model
 - implicit hardware-target selection based only on detected GPU names
 
@@ -109,6 +109,16 @@ inferpack/
 |-- README.md
 |-- pyproject.toml
 |-- uv.lock
+|-- monitoring/
+|   |-- compose.yaml
+|   |-- .env.example
+|   |-- README.md
+|   |-- prometheus/
+|   |   |-- prometheus.yml
+|   |   `-- targets/
+|   `-- grafana/
+|       |-- provisioning/
+|       `-- dashboards/
 |-- docs/
 |   |-- README.md
 |   |-- SPEC.md
@@ -297,6 +307,35 @@ models/gemma-4-e4b-it/sglang/targets/dgx-spark/
 
 `infer models` prints one row per implemented model, engine, and hardware
 target, including provider, target-level status, and served name.
+
+## Shared Monitoring
+
+`monitoring/` owns one Docker Compose deployment of Prometheus and Grafana,
+independent of the model packs. Dev and prod share this stack; Prometheus scrape
+target labels (`environment`, `model`, `engine`, `hardware`) identify workloads.
+These labels are dashboard filters, not access-control or resource-isolation
+boundaries. Docker image tags pin monitoring software versions, not environments.
+
+Prometheus discovers explicit endpoints from files in `monitoring/prometheus/targets/`.
+The initial target is Gemma 4 26B A4B on the local DGX Spark, labelled `dev`.
+Each endpoint is listed once. A separate prod service needs a distinct endpoint;
+changing an environment label creates a new time series. Scraping model host
+ports allows the monitoring host to move without changing inference pack networks.
+Model-specific flags, including `--enable-metrics`, remain in each target pack.
+
+Both monitoring services use pinned official images, persistent Docker volumes,
+and restart policies. Prometheus retains 30 days of samples by default. Grafana
+provisions its data source and dashboard from tracked files; credentials stay in
+an ignored local `.env`. Published monitoring ports bind to loopback by default.
+`GRAFANA_BIND_ADDRESS` overrides Grafana independently for remote browser access;
+the deployed Spark uses its Tailscale IPv4 address for Grafana while Prometheus
+stays on loopback. Clients need access to the same tailnet.
+Grafana login remains required. A browser on another machine uses the Spark's
+Tailscale address, not its own `localhost` (unless using an SSH tunnel).
+Both environments share retention, storage, and monitoring outages. Historical
+samples survive model restarts; counters reset, and `rate`/`increase` account for
+observed resets. Collection gaps cannot be reconstructed. This stack includes
+metrics and dashboards; alert routing is not configured.
 
 ## Runtime Assumptions
 

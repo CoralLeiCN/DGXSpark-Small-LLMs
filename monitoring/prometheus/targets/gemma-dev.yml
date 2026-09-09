@@ -1,0 +1,8 @@
+# The Docker host's published SGLang port; use the Spark's LAN address instead
+# when moving monitoring to another machine. Do not list an endpoint twice.
+- targets: [host.docker.internal:30000]
+  labels:
+    environment: dev
+    model: gemma-4-26b-a4b-it
+    engine: sglang
+    hardware: dgx-spark

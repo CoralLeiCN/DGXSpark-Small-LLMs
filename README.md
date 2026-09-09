@@ -114,6 +114,12 @@ infer stop qwen3-embedding-8b --target dgx-spark
 See the [model recipe](models/qwen3-embedding-8b/README.md) for query formatting,
 Matryoshka dimensions, memory settings, and qualification results.
 
+## Monitoring
+
+The [shared monitoring stack](monitoring/README.md) runs Prometheus and Grafana
+in Docker, with persistent history and one inference dashboard filtered by dev
+or prod and model. The initial scrape target is Gemma 4 26B A4B on DGX Spark.
+
 ## Commands
 
 The Python 3.12 CLI runs through `uv`:
