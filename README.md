@@ -148,6 +148,16 @@ on disk. Unrelated services and containers created from other checkout paths are
 outside its scope. If a shutdown fails, it attempts the remaining services and
 returns an error. Use `make start MODEL=...` to start again.
 
+Linked Git worktrees count as different checkouts. A model started from a Codex
+worktree can therefore remain running after `infer stop-all` reports zero in
+the main checkout. Use `docker ps` for a host-wide inventory and inspect the
+container's `com.docker.compose.project.working_dir` label to find its owning
+target directory. Run `uv run --python 3.12 infer stop-all` from that worktree's
+repository root, or stop the identified container directly with `docker stop`.
+The CLI's repository scope follows its installed source location, so use the
+owning checkout's uv environment instead of an `infer` executable installed
+from another checkout.
+
 ## Commands
 
 The Python 3.12 CLI runs through `uv`:
