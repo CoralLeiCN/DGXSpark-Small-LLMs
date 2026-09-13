@@ -120,6 +120,34 @@ The [shared monitoring stack](monitoring/README.md) runs Prometheus and Grafana
 in Docker, with persistent history and one inference dashboard filtered by dev
 or prod and model. The initial scrape target is Gemma 4 26B A4B on DGX Spark.
 
+After the [one-time monitoring setup](monitoring/README.md#start), start monitoring
+and a model together from the repository root:
+
+```bash
+make start MODEL=gemma-4-26b-a4b-it
+```
+
+This starts Prometheus and Grafana, waits for their health checks, then runs
+`infer deploy` to check, build, and start the model. `ENGINE` defaults to `sglang`
+and `TARGET` to `dgx-spark`; both can be overridden on the command line. Model
+loading continues in the background; use `infer validate` once it is ready.
+Monitoring stays running if model deployment fails or the model is stopped.
+For other models, configure metrics and a scrape target as described in the
+[monitoring guide](monitoring/README.md#connect-model-services).
+
+To free GPU and memory resources by stopping all model services and monitoring:
+
+```bash
+make stop-all
+```
+
+No model selection is required. This stops running containers owned by the current
+repository's model packs and monitoring stack on the current Docker daemon.
+Stopped containers, images, model caches, networks, and monitoring history remain
+on disk. Unrelated services and containers created from other checkout paths are
+outside its scope. If a shutdown fails, it attempts the remaining services and
+returns an error. Use `make start MODEL=...` to start again.
+
 ## Commands
 
 The Python 3.12 CLI runs through `uv`:
@@ -127,6 +155,7 @@ The Python 3.12 CLI runs through `uv`:
 ```bash
 infer models
 infer services
+infer stop-all
 infer build <model> --engine sglang --target <hardware>
 infer serve <model> --engine sglang --target <hardware>
 infer deploy <model> --engine sglang --target <hardware>

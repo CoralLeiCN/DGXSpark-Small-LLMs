@@ -327,6 +327,16 @@ including those created from a previous recipe path, are omitted.
 
 ## Shared Monitoring
 
+`make start MODEL=<model>` starts the shared monitoring stack, waits for its health
+checks, then invokes `infer deploy` for the selected pack. `make stop-all` invokes
+`infer stop-all` to stop running containers for every discovered pack and the
+monitoring stack on the current Docker daemon. Shutdown matches each Compose
+file's resolved working-directory and configuration-file ownership labels,
+independently of project-name overrides or `.env` contents. Other checkout paths
+are outside its scope. It attempts remaining containers after failures and returns
+nonzero if discovery or shutdown fails. Stopped containers, images, caches,
+networks, and persistent monitoring volumes are retained.
+
 `monitoring/` owns one Docker Compose deployment of Prometheus and Grafana,
 independent of the model packs. Dev and prod share this stack; Prometheus scrape
 target labels (`environment`, `model`, `engine`, `hardware`) identify workloads.
