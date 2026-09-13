@@ -101,6 +101,27 @@ def compose_ps(target: HardwareTarget, *, include_all: bool = False) -> list[dic
     return [container for container in containers if container["ID"] in owned_ids]
 
 
+def running_compose_container_ids(compose_file: Path) -> list[str]:
+    """Find running containers by ownership without loading Compose environment files."""
+    compose_file = compose_file.resolve()
+    result = run(
+        [
+            "docker",
+            "container",
+            "ls",
+            "--no-trunc",
+            "--filter",
+            f"label=com.docker.compose.project.working_dir={compose_file.parent}",
+            "--filter",
+            f"label=com.docker.compose.project.config_files={compose_file}",
+            "--format",
+            "{{.ID}}",
+        ],
+        capture_output=True,
+    )
+    return result.stdout.split()
+
+
 def image_exists(image: str) -> bool:
     result = run(
         ["docker", "image", "inspect", image],

@@ -23,6 +23,19 @@ docker compose -f monitoring/compose.yaml up -d
 docker compose -f monitoring/compose.yaml ps
 ```
 
+Once the password is configured, you can start this stack and a model with one
+command from the repository root:
+
+```bash
+make start MODEL=gemma-4-26b-a4b-it
+```
+
+`make start` waits for monitoring to become healthy, then calls `infer deploy`
+to run preflight, build, and start the selected model in the background. Override
+`ENGINE=sglang` or `TARGET=dgx-spark` as needed. It reuses the shared monitoring
+stack, which stays running if model deployment fails or the model is stopped.
+Model metrics and scrape targets still need the configuration below.
+
 The initial deployment has a generated password in the ignored local `.env`.
 Login as `admin` using that password. This variable initializes a new Grafana
 database; editing it later does not change an existing account's password.
@@ -153,6 +166,15 @@ Set `SGLANG_TEST_URL`, `PROMETHEUS_TEST_URL`, or
 Grafana's default test URL follows its bind address and configured port.
 
 ## Storage and operation
+
+Run `make stop-all` (or `uv run --python 3.12 infer stop-all`) from the repository
+root to stop all running model containers and both monitoring services owned by
+this checkout on the current Docker daemon. It releases their GPU and memory
+resources while preserving stopped containers, images, caches, networks, and
+monitoring volumes. Shutdown uses Compose ownership labels, so it does not need
+the Grafana password or load `.env` files. Containers from other checkout paths
+are outside its scope. It attempts remaining services after a failure and returns
+an error if any shutdown failed. Restart with `make start MODEL=<model>`.
 
 Prometheus retains 30 days by default (`PROMETHEUS_RETENTION`). Named volumes
 `prometheus-data` and `grafana-data`, scoped to `inferpack-monitoring`, persist

@@ -17,6 +17,7 @@ from .manifest import (
     ModelManifest,
     discover_manifests,
     load_manifest,
+    repository_root,
 )
 
 
@@ -41,6 +42,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--all",
         action="store_true",
         help="Include stopped containers.",
+    )
+
+    subparsers.add_parser(
+        "stop-all",
+        help="Stop all running model and monitoring containers owned by this repository.",
     )
 
     for command in (
@@ -102,6 +108,9 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.command == "services":
             _list_services(include_all=args.all)
+            return 0
+        if args.command == "stop-all":
+            _stop_all()
             return 0
 
         manifest = load_manifest(args.model)
@@ -214,6 +223,43 @@ def _list_services(*, include_all: bool) -> None:
         ("MODEL", "ENGINE", "TARGET", "SERVICE", "CONTAINER", "STATE", "HEALTH", "PORTS"),
         rows,
     )
+
+
+def _stop_all() -> None:
+    errors: list[str] = []
+    compose_files: list[Path] = []
+    try:
+        compose_files.extend(
+            target.compose_file
+            for manifest in discover_manifests()
+            for engine in manifest.engines.values()
+            for target in engine.targets.values()
+        )
+    except (ManifestError, OSError) as exc:
+        errors.append(f"Model discovery: {exc}")
+    compose_files.append(repository_root() / "monitoring" / "compose.yaml")
+
+    seen_ids: set[str] = set()
+    stopped = 0
+    for compose_file in compose_files:
+        try:
+            container_ids = docker.running_compose_container_ids(compose_file)
+        except docker.DockerError as exc:
+            errors.append(f"{compose_file}: {exc}")
+            continue
+        for container_id in container_ids:
+            if container_id in seen_ids:
+                continue
+            seen_ids.add(container_id)
+            try:
+                docker.run(["docker", "container", "stop", container_id])
+                stopped += 1
+            except docker.DockerError as exc:
+                errors.append(str(exc))
+
+    print(f"Stopped {stopped} container(s). Cached models and monitoring data are preserved.")
+    if errors:
+        raise docker.DockerError("Some services could not be stopped:\n" + "\n".join(errors))
 
 
 def _service_ports(container: dict) -> str:
