@@ -52,4 +52,8 @@ if [[ -n "${SGLANG_EXTRA_ARGS:-}" ]]; then
   args+=("${extra_args[@]}")
 fi
 
+# The shared start command requires metrics while preserving pack-specific extras.
+if [[ "${INFERPACK_ENABLE_METRICS:-0}" == 1 && " ${args[*]} " != *" --enable-metrics "* ]]; then
+  args+=(--enable-metrics)
+fi
 exec "${args[@]}"

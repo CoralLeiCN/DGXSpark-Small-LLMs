@@ -118,7 +118,7 @@ Matryoshka dimensions, memory settings, and qualification results.
 
 The [shared monitoring stack](monitoring/README.md) runs Prometheus and Grafana
 in Docker, with persistent history and one inference dashboard filtered by dev
-or prod and model. The initial scrape target is Gemma 4 26B A4B on DGX Spark.
+or prod and model. Local scrape targets are registered automatically by `make start`.
 
 After the [one-time monitoring setup](monitoring/README.md#start), start monitoring
 and a model together from the repository root:
@@ -127,13 +127,17 @@ and a model together from the repository root:
 make start MODEL=gemma-4-26b-a4b-it
 ```
 
-This starts Prometheus and Grafana, waits for their health checks, then runs
-`infer deploy` to check, build, and start the model. `ENGINE` defaults to `sglang`
-and `TARGET` to `dgx-spark`; both can be overridden on the command line. Model
-loading continues in the background; use `infer validate` once it is ready.
-Monitoring stays running if model deployment fails or the model is stopped.
-For other models, configure metrics and a scrape target as described in the
-[monitoring guide](monitoring/README.md#connect-model-services).
+This runs `infer start`: it starts Prometheus and Grafana, waits for their health
+checks, then checks, builds, and starts the model with metrics enabled. After the
+container starts successfully, it registers its actual published port with the
+correct model, engine, hardware, and environment labels. Reusing a port replaces
+its previous model label; models on other ports keep their targets. `ENGINE`
+defaults to `sglang`, `TARGET` to `dgx-spark`, and `MONITORING_ENVIRONMENT` to `dev`;
+all can be overridden on the command line. Model loading continues in the
+background; collection starts when `/metrics` becomes available. Use `infer
+validate` once the model is ready. Monitoring stays running if deployment fails
+or the model is stopped. Direct `infer serve` and `infer deploy` remain model-only
+commands; see the [monitoring guide](monitoring/README.md#connect-model-services).
 
 To free GPU and memory resources by stopping all model services and monitoring:
 
@@ -166,6 +170,7 @@ The Python 3.12 CLI runs through `uv`:
 infer models
 infer services
 infer stop-all
+infer start <model> --engine sglang --target <hardware> [--environment dev|prod]
 infer build <model> --engine sglang --target <hardware>
 infer serve <model> --engine sglang --target <hardware>
 infer deploy <model> --engine sglang --target <hardware>

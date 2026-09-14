@@ -7,7 +7,7 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Sequence
+from typing import Mapping, Sequence
 
 from .manifest import HardwareTarget
 
@@ -22,6 +22,7 @@ def compose(
     *,
     check: bool = True,
     capture_output: bool = False,
+    environment: Mapping[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     command = [
         "docker",
@@ -37,6 +38,7 @@ def compose(
         cwd=target.directory,
         check=check,
         capture_output=capture_output,
+        environment=environment,
     )
 
 
@@ -183,12 +185,13 @@ def run(
     cwd: Path | None = None,
     check: bool = True,
     capture_output: bool = False,
+    environment: Mapping[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     try:
         return subprocess.run(
             command,
             cwd=cwd,
-            env=runtime_environment(),
+            env={**runtime_environment(), **(environment or {})},
             check=check,
             text=True,
             capture_output=capture_output,

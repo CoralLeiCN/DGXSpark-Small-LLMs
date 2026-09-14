@@ -327,8 +327,15 @@ including those created from a previous recipe path, are omitted.
 
 ## Shared Monitoring
 
-`make start MODEL=<model>` starts the shared monitoring stack, waits for its health
-checks, then invokes `infer deploy` for the selected pack. `make stop-all` invokes
+`make start MODEL=<model>` invokes `infer start` to start the shared monitoring
+stack, wait for its health checks, then preflight, build, and start the selected
+pack. It requires metrics through `INFERPACK_ENABLE_METRICS=1`; each target's
+launch script owns the engine flag and preserves existing extra arguments. After
+a successful container start, it registers the actual published inference port
+using Compose's ownership-checked container data, including `.env` and shell port
+overrides. Loading continues in the background; collection begins when `/metrics`
+is available. Direct `infer deploy` and `infer serve` remain model-only commands.
+`make stop-all` invokes
 `infer stop-all` to stop running containers for every discovered pack and the
 monitoring stack on the current Docker daemon. Shutdown matches each Compose
 file's resolved working-directory and configuration-file ownership labels,
@@ -343,12 +350,24 @@ target labels (`environment`, `model`, `engine`, `hardware`) identify workloads.
 These labels are dashboard filters, not access-control or resource-isolation
 boundaries. Docker image tags pin monitoring software versions, not environments.
 
-Prometheus discovers explicit endpoints from files in `monitoring/prometheus/targets/`.
-The initial target is Gemma 4 26B A4B on the local DGX Spark, labelled `dev`.
-Each endpoint is listed once. A separate prod service needs a distinct endpoint;
-changing an environment label creates a new time series. Scraping model host
-ports allows the monitoring host to move without changing inference pack networks.
-Model-specific flags, including `--enable-metrics`, remain in each target pack.
+Prometheus discovers endpoints from files in `monitoring/prometheus/targets/`.
+`infer start` maintains an ignored `local-auto.yml` registry, with serialized,
+atomic updates. Each local endpoint is listed once; starting another model on
+that endpoint replaces its labels only after a successful container start. Moving
+a pack's port or environment replaces its old entry, while other packs' endpoints
+remain. An occupied port is not freed automatically. Stopped entries remain
+visible as unreachable until replaced or removed. The environment defaults to
+`dev`; use `MONITORING_ENVIRONMENT=prod` with Make or `--environment prod` with the
+CLI. A separate prod service needs a distinct endpoint. Changing labels creates
+new time series; earlier samples retain their original labels.
+
+Manual remote endpoints live in separate discovery files. A duplicate manual
+entry is reported as an error, with its file location, instead of being scraped
+twice. The generated registry belongs to the checkout running `make start` and
+uses `host.docker.internal` to reach wildcard-published local model ports.
+Run monitoring and models from the same checkout. For monitoring on a separate
+host, configure explicit reachable endpoints instead. Model-specific flags,
+including `--enable-metrics`, remain in each target pack.
 
 Both monitoring services use pinned official images, persistent Docker volumes,
 and restart policies. Prometheus retains 30 days of samples by default. Grafana

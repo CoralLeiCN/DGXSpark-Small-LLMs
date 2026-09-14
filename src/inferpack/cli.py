@@ -11,7 +11,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from . import docker
+from . import docker, monitoring
 from .manifest import (
     ManifestError,
     ModelManifest,
@@ -53,6 +53,7 @@ def build_parser() -> argparse.ArgumentParser:
         "build",
         "serve",
         "deploy",
+        "start",
         "stop",
         "logs",
         "status",
@@ -61,6 +62,11 @@ def build_parser() -> argparse.ArgumentParser:
     ):
         subparser = subparsers.add_parser(command)
         _add_model_arguments(subparser)
+        if command == "start":
+            subparser.add_argument(
+                "--environment", default="dev", choices=("dev", "prod"),
+                help="Prometheus environment label (default: dev).",
+            )
         if command == "logs":
             subparser.add_argument(
                 "--no-follow",
@@ -121,7 +127,9 @@ def main(argv: list[str] | None = None) -> int:
             docker.compose(target, ["build"])
         elif args.command == "serve":
             docker.compose(target, ["up", "-d", "--no-build"])
-        elif args.command == "deploy":
+        elif args.command in {"deploy", "start"}:
+            if args.command == "start":
+                monitoring.start_stack(repository_root())
             _preflight(
                 manifest,
                 args.engine,
@@ -129,7 +137,16 @@ def main(argv: list[str] | None = None) -> int:
                 skip_gpu_check=False,
             )
             docker.compose(target, ["build"])
-            docker.compose(target, ["up", "-d", "--no-build"])
+            if args.command == "start":
+                docker.compose(
+                    target, ["up", "-d", "--no-build"],
+                    environment={"INFERPACK_ENABLE_METRICS": "1"},
+                )
+                monitoring.register_model(
+                    repository_root(), manifest, engine.name, target, args.environment,
+                )
+            else:
+                docker.compose(target, ["up", "-d", "--no-build"])
         elif args.command == "stop":
             docker.compose(target, ["down"])
         elif args.command == "logs":
