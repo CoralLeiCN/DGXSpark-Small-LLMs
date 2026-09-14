@@ -30,11 +30,13 @@ command from the repository root:
 make start MODEL=gemma-4-26b-a4b-it
 ```
 
-`make start` waits for monitoring to become healthy, then calls `infer deploy`
-to run preflight, build, and start the selected model in the background. Override
-`ENGINE=sglang` or `TARGET=dgx-spark` as needed. It reuses the shared monitoring
+`make start` calls `infer start`, which waits for monitoring to become healthy,
+then runs preflight, builds, and starts the selected model in the background.
+It enables metrics and registers the actual published inference port automatically.
+Override `ENGINE=sglang`, `TARGET=dgx-spark`, or `MONITORING_ENVIRONMENT=dev` as
+needed; the environment can be `dev` or `prod`. It reuses the shared monitoring
 stack, which stays running if model deployment fails or the model is stopped.
-Model metrics and scrape targets still need the configuration below.
+The existing one-time Grafana password setup is still required.
 
 The initial deployment has a generated password in the ignored local `.env`.
 Login as `admin` using that password. This variable initializes a new Grafana
@@ -70,8 +72,38 @@ Grafana-specific override when only the dashboard needs remote access.
 
 ## Connect model services
 
-The initial target is **Gemma 4 26B A4B**, labelled `dev`, on host port 30000.
-It is distinct from the smaller Gemma E4B recipe. Its target `.env` must contain:
+For local services, use `make start MODEL=<model>`. All six SGLang packs honor
+the start command's `INFERPACK_ENABLE_METRICS=1` setting, even when their `.env`
+has an empty `SGLANG_EXTRA_ARGS`. Other extra launch arguments are preserved.
+No per-model scrape configuration is required.
+
+After Docker successfully starts the model container, the CLI reads its actual
+published port, including `.env` and exported `SGLANG_PORT` overrides, and writes
+`prometheus/targets/local-auto.yml`. This ignored file is updated atomically and
+is readable by the Prometheus container. Repeated starts do not add duplicates.
+A different model using the same endpoint replaces the old labels; moving a pack
+to a new port or environment removes that pack's old entry. Entries for other
+ports remain. This does not stop an existing model to free an occupied port:
+stop it explicitly before starting a replacement. Failed builds or container
+starts do not relabel its endpoint.
+
+The model continues loading in the background. Prometheus discovers target
+changes within its 15-second refresh interval and begins collecting when
+`/metrics` becomes available. Registration is not a model-readiness check.
+Stopped targets remain visible as unreachable until replaced or removed; history
+stays in Prometheus. Starts performed with direct `infer serve` or `infer deploy`
+do not update the registry. The registry belongs to the checkout running
+`make start`; operate monitoring and models from the same checkout.
+
+For example, start the two embedding services on their default distinct ports:
+
+```bash
+make start MODEL=tomoro-colqwen3-embed-4b  # port 30001
+make start MODEL=qwen3-embedding-8b       # port 30002
+```
+
+For a manually managed service started with `infer serve` or `infer deploy`,
+enable metrics in its target `.env` and add an explicit target file as below:
 
 ```dotenv
 SGLANG_EXTRA_ARGS="--enable-metrics"
@@ -97,7 +129,7 @@ mapped to the Docker host gateway on Linux. If monitoring moves to another
 machine, replace that hostname in the target file with the Spark's reachable
 LAN address. `localhost` inside Prometheus refers to its own container.
 
-To add a real prod service, create another YAML file under
+To add a manually managed remote prod service, create another YAML file under
 `monitoring/prometheus/targets/` using its distinct, reachable endpoint:
 
 ```yaml
@@ -109,10 +141,14 @@ To add a real prod service, create another YAML file under
     hardware: dgx-spark
 ```
 
-The target files are watched automatically. List each endpoint only once to
-avoid counting the same workload twice. If another model takes over the same
-port, update the target's `model` label. Dev/prod are metric labels, not Docker
-image tags. No placeholder prod endpoint is scraped by default.
+The target files are watched automatically. Keep manual endpoints in separate
+files and list each endpoint only once. If a manual file already lists an endpoint
+being registered automatically, `make start` reports the conflicting file rather
+than double-counting it; remove that manual entry and rerun. The old tracked
+`gemma-dev.yml` target has been removed in favor of automatic registration.
+For manually managed endpoints, update the model label when changing models.
+Dev/prod are metric labels, not Docker image tags. No placeholder endpoints are
+scraped by default.
 
 ## Dashboard and interpretation
 
