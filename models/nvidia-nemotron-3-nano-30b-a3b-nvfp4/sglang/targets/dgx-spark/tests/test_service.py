@@ -67,3 +67,25 @@ class TestNemotronSGLangService:
         )
 
         assert manifest.validation_max_tokens == 512
+
+
+def test_smoke_request_disables_reasoning_and_still_requires_final_text(monkeypatch):
+    from inferpack.cli import _validate_chat
+    import pytest
+
+    manifest = load_manifest("nvidia-nemotron-3-nano-30b-a3b-nvfp4", REPOSITORY_ROOT)
+    assert manifest.validation_enable_thinking is False
+    payload = {"choices": [{"message": {"content": "A short GPU haiku"}}]}
+
+    def post(url, body, timeout):
+        assert body["chat_template_kwargs"] == {"enable_thinking": False}
+        assert body["temperature"] == 0
+        assert body["top_p"] == 1
+        assert body["max_tokens"] == 512
+        return payload
+
+    monkeypatch.setattr("inferpack.cli._post_json", post)
+    _validate_chat(manifest, 30000, 1)
+    payload["choices"][0]["message"] = {"content": "", "reasoning_content": "Unfinished reasoning"}
+    with pytest.raises(RuntimeError, match="no final content"):
+        _validate_chat(manifest, 30000, 1)

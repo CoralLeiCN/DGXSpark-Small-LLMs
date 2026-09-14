@@ -163,6 +163,11 @@ validation:
 
 ## Add A Model Or Target
 
+Generation validation can optionally set `enable_thinking: false` to request
+a final answer within a bounded smoke-test budget. Chat Completions validation
+uses greedy sampling in this mode; server defaults are unchanged. See the
+[validation contract](SPEC.md) for endpoint defaults.
+
 1. Choose a globally unique model slug and create `models/<model>/` if needed.
 2. Add or update the model-level `manifest.yaml` and `README.md`.
 3. Add `<engine>/targets/<hardware>/` only for the engine and hardware being

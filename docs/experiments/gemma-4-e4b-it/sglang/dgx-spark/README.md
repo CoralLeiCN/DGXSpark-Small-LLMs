@@ -6,9 +6,9 @@ Deployment recipe:
 Follow the [journal guide](../../../README.md). Each row links to one immutable
 experiment turn; later turns link back to the observations they continue.
 
-Runs recorded: 7
+Runs recorded: 8
 
-Next run ID: `RUN-0008`
+Next run ID: `RUN-0009`
 
 | Run ID | Time (UTC) | Status | Outcome |
 | --- | --- | --- | --- |
@@ -19,3 +19,4 @@ Next run ID: `RUN-0008`
 | `RUN-0005` | 2026-09-13T22:08:12Z | resolved | [AIPerf concurrency baseline: 96 measured requests passed](2026-09-13T22-08-12Z-aiperf-concurrency-baseline.md) |
 | `RUN-0006` | 2026-09-13T22:45:13Z | resolved | [Throughput plateau confirmed at client concurrency 4, 6, 8, and 12](2026-09-13T22-45-13Z-aiperf-configured-throughput-plateau.md) |
 | `RUN-0007` | 2026-09-13T23:04:38Z | workaround | [Worktree-owned Gemma stopped; no running containers or port 30000 listener](2026-09-13T23-04-38Z-worktree-service-stopped.md) |
+| `RUN-0008` | 2026-09-14T23:27:13Z | resolved | [Sequential MFU live validation](2026-09-14T23-27-13Z-mfu-live-validation.md) |

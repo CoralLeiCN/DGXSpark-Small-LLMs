@@ -24,3 +24,4 @@ validation:
   endpoint: /v1/chat/completions
   prompt: Write a short haiku about GPUs.
   max_tokens: 512
+  enable_thinking: false

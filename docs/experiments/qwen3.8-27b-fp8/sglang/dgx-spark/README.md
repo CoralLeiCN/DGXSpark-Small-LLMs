@@ -6,9 +6,9 @@ Deployment recipe:
 Follow the [journal guide](../../../README.md). Each row links to one immutable
 experiment turn; later turns link back to the observations they continue.
 
-Runs recorded: 21
+Runs recorded: 24
 
-Next run ID: `RUN-0022`
+Next run ID: `RUN-0025`
 
 | Run ID | Time (UTC) | Status | Outcome |
 | --- | --- | --- | --- |
@@ -33,3 +33,6 @@ Next run ID: `RUN-0022`
 | `RUN-0019` | 2026-09-14T22:17:48Z | resolved | [Repeated profiles select 64 requests for peak MTP throughput](2026-09-14T22-17-48Z-mtp-throughput-peak-confirmed.md) |
 | `RUN-0020` | 2026-09-14T22:30:07Z | resolved | [Input throughput and API-equivalent value of the measured peak](2026-09-14T22-30-07Z-token-rates-api-value.md) |
 | `RUN-0021` | 2026-09-14T22:33:51Z | resolved | [DGX Spark hosted API and rental price references](2026-09-14T22-33-51Z-spark-hosted-api-pricing.md) |
+| `RUN-0022` | 2026-09-14T22:48:06Z | resolved | [Host GPU temperature, utilisation, and power queries verified](2026-09-14T22-48-06Z-gpu-telemetry-support.md) |
+| `RUN-0023` | 2026-09-14T22:54:51Z | resolved | [SGLang estimated TFLOPS counter and dashboard query verified](2026-09-14T22-54-51Z-sglang-estimated-tflops.md) |
+| `RUN-0024` | 2026-09-14T23:46:12Z | resolved | [Sequential MFU live validation](2026-09-14T23-46-12Z-mfu-live-validation.md) |

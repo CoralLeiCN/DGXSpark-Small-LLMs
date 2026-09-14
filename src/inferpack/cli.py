@@ -464,6 +464,12 @@ def _validate_chat(manifest: ModelManifest, port: int, timeout: float) -> None:
         "temperature": 0.6,
         "top_p": 0.95,
     }
+    if manifest.validation_enable_thinking is not None:
+        body["chat_template_kwargs"] = {
+            "enable_thinking": manifest.validation_enable_thinking
+        }
+        if not manifest.validation_enable_thinking:
+            body.update(temperature=0, top_p=1)
     payload = _post_json(url, body, timeout)
 
     try:
@@ -503,7 +509,10 @@ def _validate_responses(manifest: ModelManifest, port: int, timeout: float) -> N
         "temperature": 0.6,
         "top_p": 0.95,
         "store": False,
-        "chat_template_kwargs": {"enable_thinking": False},
+        "chat_template_kwargs": {
+            "enable_thinking": manifest.validation_enable_thinking
+            if manifest.validation_enable_thinking is not None else False
+        },
     }
     payload = _post_json(url, body, timeout)
 
