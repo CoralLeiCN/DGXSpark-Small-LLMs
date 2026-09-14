@@ -30,6 +30,11 @@ positive `validation.dimensions`. Validation checks finite, normalized vectors
 of the declared dimension; model-local service tests establish numerical and
 retrieval correctness. Generation packs continue to use `validation.prompt`
 and `validation.max_tokens`. Incompatible task/endpoint pairs are rejected.
+Generation manifests may set the optional boolean `validation.enable_thinking`
+for smoke requests. An explicit false sends the chat-template toggle and uses
+greedy Chat Completions sampling to keep validation within its output budget.
+Omission preserves existing Chat Completions behaviour; Responses validation
+defaults to thinking disabled. This setting does not change server defaults.
 
 ## Supported Inference Engines
 

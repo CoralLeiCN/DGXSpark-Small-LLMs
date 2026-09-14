@@ -21,4 +21,8 @@ fi
 if [[ "${INFERPACK_ENABLE_METRICS:-0}" == 1 && " ${args[*]} " != *" --enable-metrics "* ]]; then
   args+=(--enable-metrics)
 fi
+# This pack's pinned image supports estimated model FLOP counters.
+if [[ " ${args[*]} " == *" --enable-metrics "* && " ${args[*]} " != *" --enable-mfu-metrics "* ]]; then
+  args+=(--enable-mfu-metrics)
+fi
 exec "${args[@]}"

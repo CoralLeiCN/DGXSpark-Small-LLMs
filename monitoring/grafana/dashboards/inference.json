@@ -7,7 +7,7 @@
     "sglang"
   ],
   "schemaVersion": 39,
-  "version": 3,
+  "version": 4,
   "editable": false,
   "timezone": "browser",
   "refresh": "15s",
@@ -482,6 +482,47 @@
       "fieldConfig": {
         "defaults": {
           "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Estimated model TFLOPS per GPU",
+      "type": "timeseries",
+      "description": "SGLang model FLOP estimate per scheduler, averaged over wall time including idle periods. Requires enable-metrics and enable-mfu-metrics. Approximate attention/MLP accounting; hybrid layers and speculative work may be miscounted. Not measured hardware throughput or percent of peak. Missing counters remain No data.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(sglang:estimated_flops_per_gpu_total{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}[$__rate_interval]) / 1e12",
+          "legendFormat": "{{environment}} / {{model}} / {{instance}} / TP {{tp_rank}} / PP {{pp_rank}} / EP {{moe_ep_rank}}",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:TFLOPS",
           "min": 0
         },
         "overrides": []

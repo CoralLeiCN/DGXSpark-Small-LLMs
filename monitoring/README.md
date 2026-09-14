@@ -163,6 +163,59 @@ latencies. Scrape status reports `/metrics` reachability, not model readiness.
 Generation panels apply to text-generation services; embedding services do not
 produce text output tokens.
 
+**Estimated model TFLOPS per GPU** uses the SGLang counter:
+
+```promql
+rate(sglang:estimated_flops_per_gpu_total{job="sglang"}[1m]) / 1e12
+```
+
+The panel keeps each scheduler series separate and applies the Environment and
+Model filters. It averages over wall time, including idle time, and requires
+at least two scrapes. An absent counter displays no data. Both `--enable-metrics`
+and `--enable-mfu-metrics` are required. All six DGX Spark packs add the latter
+automatically when metrics are enabled, including through `make start`. Existing
+extra arguments are preserved, and an explicit MFU flag is not duplicated.
+Direct launches with metrics disabled do not turn on MFU collection.
+
+The flag, counter name, and scheduler collection paths were checked in each
+cached image: SGLang `0.5.15.post1` for Nemotron and
+`0.0.0.dev1+g5f55db35e` for both Gemmas, Qwen3.8, and both embedding packs.
+Overriding a pack's SGLang version or base image requires rechecking compatibility.
+
+All six packs passed sequential live validation on GB10 with their recipe defaults
+and metrics enabled: readiness, configured inference validation, increasing FLOP
+counters, and positive rates through Prometheus and the Grafana data source. Both
+embedding packs also passed their live service and numerical reference tests.
+
+| Model | Live validation | Evidence |
+| --- | --- | --- |
+| `qwen3-embedding-8b` | Passed | [RUN-0003](../docs/experiments/qwen3-embedding-8b/sglang/dgx-spark/2026-09-14T23-20-51Z-mfu-live-validation.md) |
+| `tomoro-colqwen3-embed-4b` | Passed | [RUN-0007](../docs/experiments/tomoro-colqwen3-embed-4b/sglang/dgx-spark/2026-09-14T23-24-32Z-mfu-live-validation.md) |
+| `gemma-4-e4b-it` | Passed | [RUN-0008](../docs/experiments/gemma-4-e4b-it/sglang/dgx-spark/2026-09-14T23-27-13Z-mfu-live-validation.md) |
+| `gemma-4-26b-a4b-it` | Passed | [RUN-0012](../docs/experiments/gemma-4-26b-a4b-it/sglang/dgx-spark/2026-09-14T23-30-13Z-mfu-live-validation.md) |
+| `nvidia-nemotron-3-nano-30b-a3b-nvfp4` | Passed | [RUN-0011](../docs/experiments/nvidia-nemotron-3-nano-30b-a3b-nvfp4/sglang/dgx-spark/2026-09-14T23-42-50Z-mfu-live-validation.md) |
+| `qwen3.8-27b-fp8` | Passed | [RUN-0024](../docs/experiments/qwen3.8-27b-fp8/sglang/dgx-spark/2026-09-14T23-46-12Z-mfu-live-validation.md) |
+
+All 11 dashboard panel queries also returned finite data for Gemma 4 26B at its
+[recorded validation time](../docs/experiments/gemma-4-26b-a4b-it/sglang/dgx-spark/2026-09-14T23-37-29Z-all-dashboard-panels.md).
+Qwen3.8 additionally passed an earlier check with native MTP enabled. These checks
+validate telemetry plumbing; their rates are not sustained benchmark results.
+
+This is an approximate model-operation rate, not measured GPU arithmetic throughput
+or a percentage of peak. These estimators use an attention/MLP formula;
+MoE routing, hybrid GDN/Mamba layers, vision, and MTP draft/verification work are
+not fully represented. Embedding requests contribute prefill estimates rather
+than output-token throughput. Pooling and custom embedding projections are
+outside the generic estimate. Compare identical workloads and runtime versions.
+
+For a future benchmark, start the desired pack with
+`make start MODEL=<model-slug>`; this rebuilds it, enables both metrics flags,
+and registers its actual API port with Prometheus. Wait for readiness, send
+the appropriate generation or embedding workload, and allow at least two
+scrapes before reading the TFLOPS panel. The existing AIPerf runners still
+disable client-side GPU telemetry and server-metric collection; Prometheus
+records this counter independently while the monitoring stack is running.
+
 The qualified Gemma runtime exports `sglang:inter_token_latency_seconds` for
 token intervals. The dashboard uses that histogram; it does not assume the
 `time_per_output_token_seconds` name exists in every SGLang build.
@@ -182,6 +235,18 @@ token intervals. The dashboard uses that histogram; it does not assume the
   original labels.
 
 ## Repeat the live validation
+
+Run the non-live suite with importlib mode so identically named tests in
+different model packs can be collected together:
+
+```bash
+uv run --python 3.12 pytest --import-mode=importlib -q
+INFERPACK_MONITORING_TESTS=1 uv run --python 3.12 pytest monitoring/tests -q
+```
+
+The query tests check TFLOPS conversion, separate scheduler ranks, model and
+environment filtering, counter resets, idle zeros, and absent metrics, alongside
+the existing throughput and latency checks. They use the pinned Prometheus image.
 
 With Gemma ready and both monitoring services running, run from the repository
 root (this sends three short inference requests and takes about a minute):
@@ -211,6 +276,12 @@ monitoring volumes. Shutdown uses Compose ownership labels, so it does not need
 the Grafana password or load `.env` files. Containers from other checkout paths
 are outside its scope. It attempts remaining services after a failure and returns
 an error if any shutdown failed. Restart with `make start MODEL=<model>`.
+
+In the validated embedding images, SGLang drains requests and then kills its own
+process. The uv launcher reports exit 137 even after zero requests remain;
+both embedding checks completed without an OOM. See the
+[shutdown diagnosis](../docs/experiments/qwen3-embedding-8b/sglang/dgx-spark/2026-09-14T23-25-34Z-shutdown-self-kill.md)
+for the observed signal timing and upstream code path.
 
 Prometheus retains 30 days by default (`PROMETHEUS_RETENTION`). Named volumes
 `prometheus-data` and `grafana-data`, scoped to `inferpack-monitoring`, persist

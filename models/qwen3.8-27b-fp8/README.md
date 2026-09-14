@@ -163,6 +163,34 @@ so AIPerf cannot quantify prefix-cache hits. Warmups are excluded, and client
 GPU telemetry and server-metric collection are disabled. The runner does not
 start, stop, or reconfigure services.
 
+A [host telemetry check](../../docs/experiments/qwen3.8-27b-fp8/sglang/dgx-spark/2026-09-14T22-48-06Z-gpu-telemetry-support.md)
+verified GPU temperature, utilisation, and power draw on GB10 with driver
+`580.173.02`. GPU memory used/total returned `N/A` on the shared-memory device.
+Collection through AIPerf itself remains unverified.
+
+### Estimated model TFLOPS
+
+When `--enable-metrics` is present (including through `make start`), this pack
+also adds `--enable-mfu-metrics`. Rebuild the image and recreate the service to
+apply the updated launch script; `make start MODEL=qwen3.8-27b-fp8` does both.
+The shared Grafana dashboard plots
+`rate(sglang:estimated_flops_per_gpu_total[1m]) / 1e12`, with its selected
+filters and adaptive rate interval. The counter measures estimated operations;
+its rate includes idle time. It does not need DCGM or GPU hardware counters.
+
+Treat this as an approximate SGLang model-operation rate. The pinned image's
+estimator uses attention and MLP dimensions rather than complete kernel
+accounting for Qwen's hybrid GDN layers or MTP draft/verification work. It is
+not measured FP8 throughput or a reliable hardware MFU percentage. AIPerf's
+benchmark runner still disables server-metric collection; Prometheus collects
+the counter independently when monitoring is running.
+
+[Live verification with ordinary decoding](../../docs/experiments/qwen3.8-27b-fp8/sglang/dgx-spark/2026-09-14T23-46-12Z-mfu-live-validation.md)
+passed Responses and Chat Completions inference, counter increments, and the
+TFLOPS query through Prometheus and Grafana. An
+[earlier check with native MTP](../../docs/experiments/qwen3.8-27b-fp8/sglang/dgx-spark/2026-09-14T22-54-51Z-sglang-estimated-tflops.md)
+also passed inference and the Prometheus rate query.
+
 ## Native MTP Speculative Decoding
 
 On 2026-09-14, native MTP improved the same synthetic benchmark with identical

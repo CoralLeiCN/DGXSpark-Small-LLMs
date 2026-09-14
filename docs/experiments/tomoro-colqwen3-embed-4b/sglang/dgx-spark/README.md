@@ -2,9 +2,9 @@
 
 Deployment recipe: [DGX Spark pack](../../../../../models/tomoro-colqwen3-embed-4b/sglang/targets/dgx-spark/)
 
-Runs recorded: 6
+Runs recorded: 7
 
-Next run ID: `RUN-0007`
+Next run ID: `RUN-0008`
 
 | Run ID | Time (UTC) | Status | Outcome |
 | --- | --- | --- | --- |
@@ -14,3 +14,4 @@ Next run ID: `RUN-0007`
 | `RUN-0004` | 2026-09-07T12:39:09Z | open | [Reference loader resolves relative import beside a cache blob](2026-09-07T12-39-09Z-reference-local-module-path.md) |
 | `RUN-0005` | 2026-09-07T12:42:18Z | open | [Reference loader fixed; image token parity below tolerance](2026-09-07T12-42-18Z-image-reference-parity.md) |
 | `RUN-0006` | 2026-09-07T12:51:32Z | resolved | [FP32 interpolation passes image parity; service stopped](2026-09-07T12-51-32Z-image-parity-qualified-and-stopped.md) |
+| `RUN-0007` | 2026-09-14T23:24:32Z | resolved | [Sequential MFU live validation](2026-09-14T23-24-32Z-mfu-live-validation.md) |

@@ -15,6 +15,10 @@ Python 3.12, CUDA 13.1, and the NVIDIA framework stack. Docker reuses the local
 base layer and does not pull it again. The model image then installs the exact
 stable Torch family required by its pinned SGLang release.
 
+Keep the normal build network mode when reusing this image's dependency cache.
+A [build check](../../docs/experiments/nvidia-nemotron-3-nano-30b-a3b-nvfp4/sglang/dgx-spark/2026-09-14T23-10-07Z-mfu-metrics-build-cache.md)
+found that `--network none` missed the cached install layer; the normal retry reused it.
+
 ```bash
 export HF_TOKEN=hf_example
 scripts/deploy-nemotron-nano
@@ -75,6 +79,23 @@ When using a valid `HF_TOKEN` for gated content, set
 `HF_HUB_DISABLE_IMPLICIT_TOKEN=0`. The Nemotron checkpoint in this recipe is
 public, so anonymous reads are the safer default.
 
+## Benchmark monitoring
+
+When normal metrics are enabled, this pack also adds `--enable-mfu-metrics`.
+Use `make start MODEL=nvidia-nemotron-3-nano-30b-a3b-nvfp4` to rebuild the image,
+start monitoring, and register the service for scraping. The shared
+[monitoring dashboard](../../monitoring/README.md#dashboard-and-interpretation)
+shows **Estimated model TFLOPS per GPU** from
+`rate(sglang:estimated_flops_per_gpu_total[1m]) / 1e12` (using the dashboard's
+selected filters and rate window). This is a wall-time model estimate, not
+measured hardware throughput. [Live validation](../../docs/experiments/nvidia-nemotron-3-nano-30b-a3b-nvfp4/sglang/dgx-spark/2026-09-14T23-42-50Z-mfu-live-validation.md)
+passed for final-answer generation, counter increments, and the
+Prometheus/Grafana query with the bounded reasoning-disabled smoke request.
+
+The hybrid MoE/Mamba architecture is not fully represented by the generic
+attention/MLP estimator; use token throughput and latency for performance
+comparisons rather than treating this as calibrated hardware utilisation.
+
 ## Source Settings
 
 The launch command follows the model card and NVIDIA/SGLang cookbook:
@@ -94,10 +115,11 @@ The model card's SGLang example uses the older parser name `nano_v3`. Pinned
 SGLang `0.5.15.post1` exposes the same Nemotron parser as `nemotron_3`; the
 startup script uses the accepted current name.
 
-The validation request allows 512 output tokens because this reasoning model can
-spend more than 128 tokens on `reasoning_content` before producing its final
-answer. Repository validation fails when the API returns no final text, even if
-the HTTP request itself succeeds.
+The bounded smoke request sets `validation.enable_thinking: false` and uses
+greedy generation with a 512-token limit. Reasoning-enabled validation exhausted
+that budget without final text during the MFU checks. This request-level setting
+leaves the server's reasoning default available to normal clients. Repository
+validation still fails when the API returns no final text, even with HTTP 200.
 
 Sources:
 

@@ -112,8 +112,17 @@ def test_start_registers_only_after_successful_deployment(monkeypatch, failed_st
 
 
 @pytest.mark.parametrize("manifest", discover_manifests(), ids=lambda manifest: manifest.identifier)
-@pytest.mark.parametrize("extras", ["", "--max-total-tokens 1024", "--enable-metrics --max-total-tokens 1024"])
-def test_every_pack_forces_metrics_without_losing_extra_arguments(tmp_path, manifest, extras):
+@pytest.mark.parametrize("force_metrics,extras,enabled", [
+    ("1", "", True),
+    ("1", "--max-total-tokens 1024", True),
+    ("1", "--enable-metrics --enable-mfu-metrics --max-total-tokens 1024", True),
+    ("0", "", False),
+    ("0", "--enable-metrics", True),
+    ("0", "--enable-metrics --enable-mfu-metrics", True),
+])
+def test_every_pack_enables_mfu_with_metrics_without_losing_extras(
+    tmp_path, manifest, force_metrics, extras, enabled,
+):
     target = manifest.engine("sglang").target("dgx-spark")
     commands = tmp_path / "commands"
     # Capture each launcher invocation without starting an engine or preparing weights.
@@ -125,12 +134,13 @@ def test_every_pack_forces_metrics_without_losing_extra_arguments(tmp_path, mani
         ["bash", str(target.directory / "start.sh")], check=True, capture_output=True,
         env={
             **os.environ, "PATH": f"{tmp_path}:{os.environ['PATH']}",
-            "RECORDED_ARGS": str(commands), "INFERPACK_ENABLE_METRICS": "1",
+            "RECORDED_ARGS": str(commands), "INFERPACK_ENABLE_METRICS": force_metrics,
             "SGLANG_EXTRA_ARGS": extras, "MEM_FRACTION_STATIC": "0.5",
         },
     )
     arguments = commands.read_text().splitlines()
-    assert arguments.count("--enable-metrics") == 1
+    assert arguments.count("--enable-metrics") == int(enabled)
+    assert arguments.count("--enable-mfu-metrics") == int(enabled)
     if "--max-total-tokens" in extras:
         assert arguments[arguments.index("--max-total-tokens") + 1] == "1024"
 

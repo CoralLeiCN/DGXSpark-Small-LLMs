@@ -62,6 +62,21 @@ token counts, throughput, queue depth, and latency. Metric labels separate views
 within one shared stack. Change its target file when using a different host
 port or environment.
 
+### Estimated model TFLOPS
+
+When normal metrics are enabled, this pack also adds `--enable-mfu-metrics`.
+Use `make start MODEL=gemma-4-26b-a4b-it` to rebuild the image,
+start monitoring, and register the service for scraping. The shared
+[monitoring dashboard](../../monitoring/README.md#dashboard-and-interpretation)
+shows **Estimated model TFLOPS per GPU** from
+`rate(sglang:estimated_flops_per_gpu_total[1m]) / 1e12` (using the dashboard's
+selected filters and rate window). This is a wall-time model estimate, not
+measured hardware throughput. [Live validation](../../docs/experiments/gemma-4-26b-a4b-it/sglang/dgx-spark/2026-09-14T23-30-13Z-mfu-live-validation.md)
+passed for generation, counter increments, and the Prometheus/Grafana query.
+
+The generic estimator does not fully represent MoE routing, active experts, or
+vision work; treat it as an approximate signal within a fixed configuration.
+
 ## Source Settings
 
 The launch command follows the official model card and SGLang cookbook:

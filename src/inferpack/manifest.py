@@ -58,6 +58,7 @@ class ModelManifest:
     task: str = "text-generation"
     modalities: tuple[str, ...] = ("text",)
     embedding_dimensions: int | None = None
+    validation_enable_thinking: bool | None = None
 
     def engine(self, name: str) -> Engine:
         try:
@@ -176,6 +177,12 @@ def load_manifest(identifier: str, root: Path | None = None) -> ModelManifest:
             f"Endpoint {endpoint!r} is incompatible with task {task!r}"
         )
     dimensions = None
+    enable_thinking = validation.get("enable_thinking")
+    if "enable_thinking" in validation:
+        if not isinstance(enable_thinking, bool):
+            raise ManifestError("validation.enable_thinking must be a boolean")
+        if task != "text-generation":
+            raise ManifestError("validation.enable_thinking requires text-generation")
     if task != "text-generation":
         dimensions = _required_int(validation, "dimensions")
         if dimensions < 1:
@@ -199,6 +206,7 @@ def load_manifest(identifier: str, root: Path | None = None) -> ModelManifest:
         task=task,
         modalities=modalities,
         embedding_dimensions=dimensions,
+        validation_enable_thinking=enable_thinking,
     )
 
 

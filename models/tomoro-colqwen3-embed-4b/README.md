@@ -27,6 +27,23 @@ Export overrides from the target's [environment example](sglang/targets/dgx-spar
 in the invoking shell. The image uses Python 3.12 and keeps all serving
 dependencies in Docker.
 
+## Benchmark monitoring
+
+When normal metrics are enabled, this pack also adds `--enable-mfu-metrics`.
+Use `make start MODEL=tomoro-colqwen3-embed-4b` to rebuild the image,
+start monitoring, and register the service for scraping. The shared
+[monitoring dashboard](../../monitoring/README.md#dashboard-and-interpretation)
+shows **Estimated model TFLOPS per GPU** from
+`rate(sglang:estimated_flops_per_gpu_total[1m]) / 1e12` (using the dashboard's
+selected filters and rate window). This is a wall-time model estimate, not
+measured hardware throughput. [Live validation](../../docs/experiments/tomoro-colqwen3-embed-4b/sglang/dgx-spark/2026-09-14T23-24-32Z-mfu-live-validation.md)
+passed for text/image inference, counter increments, and the Prometheus/Grafana
+query, including independent Transformers text/image reference comparisons.
+
+Embedding requests contribute prefill work; output-token throughput is not a
+useful benchmark metric for these services. The generic attention/MLP estimate
+does not fully account for vision or the late-interaction projection.
+
 ## API and model behavior
 
 This is a late-interaction retrieval model. `POST /encode` returns an

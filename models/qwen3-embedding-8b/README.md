@@ -26,6 +26,23 @@ Qwen3.8 API on 30000 and the Tomoro API on 30001. Export overrides from the
 [environment example](sglang/targets/dgx-spark/.env.example) in the invoking
 shell; HF credentials are optional for this public checkpoint.
 
+## Benchmark monitoring
+
+When normal metrics are enabled, this pack also adds `--enable-mfu-metrics`.
+Use `make start MODEL=qwen3-embedding-8b` to rebuild the image,
+start monitoring, and register the service for scraping. The shared
+[monitoring dashboard](../../monitoring/README.md#dashboard-and-interpretation)
+shows **Estimated model TFLOPS per GPU** from
+`rate(sglang:estimated_flops_per_gpu_total[1m]) / 1e12` (using the dashboard's
+selected filters and rate window). This is a wall-time model estimate, not
+measured hardware throughput. [Live validation](../../docs/experiments/qwen3-embedding-8b/sglang/dgx-spark/2026-09-14T23-20-51Z-mfu-live-validation.md)
+passed for inference, counter increments, and the Prometheus/Grafana query;
+the independent Transformers embedding comparison also passed.
+
+Embedding requests contribute prefill work; output-token throughput is not a
+useful benchmark metric for these services. Pooling and normalization are outside
+the generic attention/MLP estimate.
+
 ## API
 
 `POST /v1/embeddings` returns one L2-normalized 4096-dimensional vector per

@@ -43,6 +43,21 @@ total parameters including per-layer embeddings. The 32K context and `0.85`
 static-memory defaults are conservative qualification settings rather than the
 model's native 128K limit or a hard container memory limit.
 
+## Benchmark monitoring
+
+When normal metrics are enabled, this pack also adds `--enable-mfu-metrics`.
+Use `make start MODEL=gemma-4-e4b-it` to rebuild the image,
+start monitoring, and register the service for scraping. The shared
+[monitoring dashboard](../../monitoring/README.md#dashboard-and-interpretation)
+shows **Estimated model TFLOPS per GPU** from
+`rate(sglang:estimated_flops_per_gpu_total[1m]) / 1e12` (using the dashboard's
+selected filters and rate window). This is a wall-time model estimate, not
+measured hardware throughput. [Live validation](../../docs/experiments/gemma-4-e4b-it/sglang/dgx-spark/2026-09-14T23-27-13Z-mfu-live-validation.md)
+passed for generation, counter increments, and the Prometheus/Grafana query.
+
+Per-layer embeddings and multimodal work are not fully represented by the
+generic attention/MLP estimate.
+
 ## Benchmark With AIPerf
 
 Use AIPerf as an isolated HTTP benchmark client; the model continues running in

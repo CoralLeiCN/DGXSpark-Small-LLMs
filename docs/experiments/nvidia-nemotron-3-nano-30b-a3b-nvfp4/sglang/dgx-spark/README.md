@@ -6,9 +6,9 @@ Deployment recipe:
 Follow the [journal guide](../../../README.md). Each row links to one immutable
 experiment turn; later turns link back to the observations they continue.
 
-Runs recorded: 8
+Runs recorded: 11
 
-Next run ID: `RUN-0009`
+Next run ID: `RUN-0012`
 
 | Run ID | Time (UTC) | Status | Outcome |
 | --- | --- | --- | --- |
@@ -20,3 +20,6 @@ Next run ID: `RUN-0009`
 | `RUN-0006` | 2026-09-03T21:54:10Z | resolved | [Four-worker JIT completed and the service became healthy](2026-09-03T21-54-10Z-service-ready.md) |
 | `RUN-0007` | 2026-09-03T21:55:31Z | resolved | [First-request detokenizer heartbeat timed out transiently](2026-09-03T21-55-31Z-detokenizer-heartbeat.md) |
 | `RUN-0008` | 2026-09-03T21:55:36Z | resolved | [Validation returned reasoning but no final answer](2026-09-03T21-55-36Z-empty-validation-content.md) |
+| `RUN-0009` | 2026-09-14T23:10:07Z | resolved | [MFU settings aligned; normal build networking reuses dependency cache](2026-09-14T23-10-07Z-mfu-metrics-build-cache.md) |
+| `RUN-0010` | 2026-09-14T23:36:34Z | open | [Sequential MFU live validation](2026-09-14T23-36-34Z-mfu-live-validation.md) |
+| `RUN-0011` | 2026-09-14T23:42:50Z | resolved | [Sequential MFU live validation](2026-09-14T23-42-50Z-mfu-live-validation.md) |
