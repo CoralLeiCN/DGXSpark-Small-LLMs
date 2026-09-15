@@ -126,6 +126,9 @@ def test_gemma_metrics_reach_grafana() -> None:
                 .replace("$__range", "15m")
             )
             results = query(expression, through_grafana=True)
+            if not results and panel["title"].startswith("Cached input tokens"):
+                # SGLang creates this counter's series only after a cache hit.
+                continue
             assert results, f"No data for {panel['title']}"
             assert all(math.isfinite(float(sample["value"][1])) for sample in results), panel["title"]
 
