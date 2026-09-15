@@ -74,6 +74,51 @@ def test_mixed_stream_modes_and_idle_latency(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stdout + result.stderr
 
 
+def test_cached_input_zero_requires_completed_request_evidence(tmp_path: Path) -> None:
+    monitoring = Path(__file__).resolve().parents[1]
+    dashboard = json.loads((monitoring / "grafana/dashboards/inference.json").read_text())
+    panels = {panel["id"]: panel for panel in dashboard["panels"]}
+    labels = 'environment="dev",instance="spark:30000",job="sglang",model="example"'
+    count_series = {
+        "series": f'sglang:uncached_prompt_tokens_histogram_count{{{labels}}}',
+        "values": "0+1x5",
+    }
+    checks = []
+    for panel_id, expected_labels in (
+        (12, '{environment="dev",instance="spark:30000",model="example"}'),
+        (13, "{}"),
+    ):
+        expression = (
+            panels[panel_id]["targets"][0]["expr"]
+            .replace("$environment", "dev")
+            .replace("$model", "example")
+            .replace("$__range", "5m")
+        )
+        checks.append({
+            "expr": expression,
+            "eval_time": "5m",
+            "exp_samples": [{"labels": expected_labels, "value": 0}],
+        })
+        checks.append({
+            "expr": expression.replace('model=~"example"', 'model=~"absent"'),
+            "eval_time": "5m",
+            "exp_samples": [],
+        })
+    fixture = {"evaluation_interval": "1m", "tests": [{
+        "interval": "1m", "input_series": [count_series],
+        "promql_expr_test": checks,
+    }]}
+    (tmp_path / "cached-input.yml").write_text(yaml.safe_dump(fixture))
+    image = yaml.safe_load((monitoring / "compose.yaml").read_text())["services"]["prometheus"]["image"]
+    result = subprocess.run(
+        ["docker", "run", "--rm", "--network", "none", "--user", "0:0",
+         "-v", f"{tmp_path}:/tests:ro", "--entrypoint", "promtool", image,
+         "test", "rules", "/tests/cached-input.yml"],
+        capture_output=True, text=True, timeout=60,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
 def test_estimated_tflops_preserves_ranks_filters_and_counter_resets(tmp_path: Path) -> None:
     monitoring = Path(__file__).resolve().parents[1]
     dashboard = json.loads((monitoring / "grafana/dashboards/inference.json").read_text())

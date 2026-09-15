@@ -7,7 +7,7 @@
     "sglang"
   ],
   "schemaVersion": 39,
-  "version": 4,
+  "version": 5,
   "editable": false,
   "timezone": "browser",
   "refresh": "15s",
@@ -251,6 +251,90 @@
       }
     },
     {
+      "id": 12,
+      "title": "Cached input tokens since engine restart",
+      "type": "stat",
+      "description": "Raw cached prompt tokens since engine restart, summed across cache sources. Shows zero after a completed request proves this exporter tracks uncached prompts but no cache-hit series exists. No data before that evidence or when this metric family is unavailable. Resets on restart.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (environment, model, instance) (sglang:cached_tokens_total{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}) or (0 * sum by (environment, model, instance) (sglang:uncached_prompt_tokens_histogram_count{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}))",
+          "legendFormat": "{{environment}} / {{model}} / {{instance}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 13,
+      "title": "Cached input tokens in selected range",
+      "type": "stat",
+      "description": "Cached prompt tokens estimated from collected samples in the selected range, summed across cache sources. Shows zero after two histogram scrapes with no cache-hit series. No data without that evidence, or before a newly created cache-hit series has two scrapes. Counter resets are handled; missing history cannot be recovered.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(increase(sglang:cached_tokens_total{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}[$__range])) or ((0 * sum(increase(sglang:uncached_prompt_tokens_histogram_count{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}[$__range]))) unless sum(sglang:cached_tokens_total{job=\"sglang\",environment=~\"$environment\",model=~\"$model\"}))",
+          "legendFormat": "{{environment}} / {{model}} / {{instance}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value"
+      }
+    },
+    {
       "id": 5,
       "title": "Output throughput",
       "type": "timeseries",
@@ -261,7 +345,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 4,
+        "y": 8,
         "w": 12,
         "h": 8
       },
@@ -302,7 +386,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 4,
+        "y": 8,
         "w": 12,
         "h": 8
       },
@@ -343,7 +427,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 12,
+        "y": 16,
         "w": 12,
         "h": 8
       },
@@ -384,7 +468,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 12,
+        "y": 16,
         "w": 12,
         "h": 8
       },
@@ -425,7 +509,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 20,
+        "y": 24,
         "w": 12,
         "h": 8
       },
@@ -466,7 +550,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 20,
+        "y": 24,
         "w": 12,
         "h": 8
       },
@@ -507,7 +591,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 28,
+        "y": 32,
         "w": 24,
         "h": 8
       },

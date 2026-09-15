@@ -121,7 +121,7 @@ After startup and warmup, verify inference and metrics:
 ```bash
 uv run --python 3.12 infer validate gemma-4-26b-a4b-it --engine sglang --target dgx-spark --timeout 600
 curl -fsS http://localhost:30000/metrics |
-  rg '^sglang:(generation_tokens_total|prompt_tokens_total|gen_throughput)'
+  rg '^sglang:(generation_tokens_total|prompt_tokens_total|cached_tokens_total|gen_throughput)'
 ```
 
 Prometheus reaches the published model port through `host.docker.internal`,
@@ -158,10 +158,30 @@ filters to inspect dev, prod, or both. Edit the tracked JSON to change the
 provisioned dashboard; Grafana refreshes the file periodically.
 
 Panels show scrape status, output tokens since restart, estimated input/output
-tokens during the selected range, throughput, running/queued requests, and mean
-latencies. Scrape status reports `/metrics` reachability, not model readiness.
+tokens during the selected range, cached input tokens since restart and during
+the selected range, throughput, running/queued requests, and mean latencies.
+Scrape status reports `/metrics` reachability, not model readiness.
 Generation panels apply to text-generation services; embedding services do not
 produce text output tokens.
+
+Cached-input panels sum `sglang:cached_tokens_total` across its `cache_source`
+labels, such as device, host, and storage. The counter is emitted by SGLang
+`0.5.15.post1`; the other pinned builds need a live `/metrics` check. SGLang
+creates a cached-token series only after a hit. In the checked `0.5.14` and
+`0.5.15.post1` sources, the uncached-prompt histogram is observed for every
+completed request and accompanies the cached counter. The panels use that
+histogram as evidence to show **0** when no cache-hit series exists after
+requests have completed. **No data** means the exporter has not yet supplied
+that evidence, a new cache-hit series has fewer than two scrapes for the
+selected-range estimate, or the build does not expose the histogram. A zero on an
+unchecked build needs validation that it exports both metric families.
+
+The raw counter includes activity before Prometheus connected and resets on
+engine restart; the selected-range panel estimates changes from collected
+samples and needs at least two histogram scrapes to show zero. The
+`--enable-cache-report` flag controls per-request API
+`usage.prompt_tokens_details.cached_tokens`, not this Prometheus counter.
+Neither cached-input panel separates reasoning tokens from generation tokens.
 
 **Estimated model TFLOPS per GPU** uses the SGLang counter:
 
@@ -196,8 +216,10 @@ embedding packs also passed their live service and numerical reference tests.
 | `nvidia-nemotron-3-nano-30b-a3b-nvfp4` | Passed | [RUN-0011](../docs/experiments/nvidia-nemotron-3-nano-30b-a3b-nvfp4/sglang/dgx-spark/2026-09-14T23-42-50Z-mfu-live-validation.md) |
 | `qwen3.8-27b-fp8` | Passed | [RUN-0024](../docs/experiments/qwen3.8-27b-fp8/sglang/dgx-spark/2026-09-14T23-46-12Z-mfu-live-validation.md) |
 
-All 11 dashboard panel queries also returned finite data for Gemma 4 26B at its
+The 11 previously provisioned dashboard panel queries returned finite data for
+Gemma 4 26B at its
 [recorded validation time](../docs/experiments/gemma-4-26b-a4b-it/sglang/dgx-spark/2026-09-14T23-37-29Z-all-dashboard-panels.md).
+The two cached-input panels were added later and have not yet been live-validated.
 Qwen3.8 additionally passed an earlier check with native MTP enabled. These checks
 validate telemetry plumbing; their rates are not sustained benchmark results.
 
@@ -244,9 +266,10 @@ uv run --python 3.12 pytest --import-mode=importlib -q
 INFERPACK_MONITORING_TESTS=1 uv run --python 3.12 pytest monitoring/tests -q
 ```
 
-The query tests check TFLOPS conversion, separate scheduler ranks, model and
-environment filtering, counter resets, idle zeros, and absent metrics, alongside
-the existing throughput and latency checks. They use the pinned Prometheus image.
+The query tests check cached-input zeros and absent data, TFLOPS conversion,
+separate scheduler ranks, model and environment filtering, counter resets, idle
+zeros, and absent metrics, alongside throughput and latency checks. They use the
+pinned Prometheus image.
 
 With Gemma ready and both monitoring services running, run from the repository
 root (this sends three short inference requests and takes about a minute):
@@ -259,6 +282,7 @@ INFERPACK_MONITORING_TESTS=1 uv run --python 3.12 --env-file monitoring/.env pyt
 
 The test compares API token usage with the exporter, checks a positive rate
 through Prometheus and Grafana, and evaluates every provisioned dashboard panel.
+It accepts missing cached-input samples when the histogram evidence is absent.
 It also checks that the running panels match the repository. Credentials are
 loaded from the local `.env`. The query regression test uses the pinned
 Prometheus image to check mixed streaming/non-streaming traffic and idle latency.
