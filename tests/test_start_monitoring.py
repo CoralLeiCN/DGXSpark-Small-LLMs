@@ -158,3 +158,18 @@ def test_compose_passes_metrics_override_without_replacing_other_environment(mon
     docker.compose(target, ["up", "-d"], environment={"INFERPACK_ENABLE_METRICS": "1"})
     assert seen["SGLANG_PORT"] == "32000"
     assert seen["INFERPACK_ENABLE_METRICS"] == "1"
+
+
+def test_monitoring_compose_project_is_checkout_scoped(monkeypatch, tmp_path):
+    commands = []
+
+    def run(command, **kwargs):
+        commands.append(command)
+        return subprocess.CompletedProcess(command, 0)
+
+    monkeypatch.setattr(docker, "run", run)
+    monitoring.start_stack(tmp_path / "checkout-a")
+    monitoring.start_stack(tmp_path / "checkout-b")
+
+    names = [command[command.index("--project-name") + 1] for command in commands]
+    assert names[0] != names[1]

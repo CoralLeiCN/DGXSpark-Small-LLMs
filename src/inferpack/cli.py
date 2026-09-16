@@ -159,13 +159,13 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "validate":
             _validate(
                 manifest,
-                _effective_port(engine.name, target.port),
+                docker.published_port(target, engine.name),
                 args.timeout,
             )
         elif args.command == "validate-responses":
             _validate_responses(
                 manifest,
-                _effective_port(engine.name, target.port),
+                docker.published_port(target, engine.name),
                 args.timeout,
             )
         elif args.command == "preflight":
@@ -382,20 +382,6 @@ def _preflight(
         print(f"[warning] {warning}")
     if failures:
         raise RuntimeError("; ".join(failures))
-
-
-def _effective_port(engine_name: str, default: int) -> int:
-    variable = f"{engine_name.upper()}_PORT"
-    raw_port = os.environ.get(variable)
-    if raw_port is None:
-        return default
-    try:
-        port = int(raw_port)
-    except ValueError as exc:
-        raise ValueError(f"{variable} must be an integer") from exc
-    if not 1 <= port <= 65535:
-        raise ValueError(f"{variable} must be between 1 and 65535")
-    return port
 
 
 def _validate(manifest: ModelManifest, port: int, timeout: float) -> None:

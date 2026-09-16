@@ -14,10 +14,11 @@ from .manifest import HardwareTarget, ModelManifest
 
 
 def start_stack(root: Path) -> None:
-    docker.run(
-        ["docker", "compose", "-f", str(root / "monitoring/compose.yaml"),
-         "up", "-d", "--wait"],
-        cwd=root,
+    docker.compose_file(
+        root / "monitoring/compose.yaml",
+        ["up", "-d", "--wait"],
+        repository=root,
+        project="inferpack-monitoring",
     )
 
 
@@ -37,19 +38,17 @@ def register_model(
         for publisher in container.get("Publishers") or []
         if publisher.get("Protocol") == "tcp" and publisher.get("PublishedPort")
     ]
-    ports = {int(publisher["PublishedPort"]) for publisher in publishers}
-    if len(ports) != 1:
-        raise RuntimeError(
-            "Cannot register monitoring: expected one published inference port "
-            f"for {manifest.identifier}, found {sorted(ports)}."
-        )
+    try:
+        port = docker.published_port(target, engine, containers=containers)
+    except docker.DockerError as exc:
+        raise RuntimeError(f"Cannot register monitoring: {exc}") from exc
     if not any(publisher.get("URL") in {"", "0.0.0.0", "::", None}
                for publisher in publishers):
         raise RuntimeError(
             "Cannot register monitoring: the model port must be published on "
             "all host interfaces so Prometheus can reach the Docker host gateway."
         )
-    endpoint = f"host.docker.internal:{ports.pop()}"
+    endpoint = f"host.docker.internal:{port}"
     labels = {
         "environment": environment,
         "model": manifest.identifier,
