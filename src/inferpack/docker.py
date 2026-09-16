@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -27,6 +29,11 @@ def compose(
     command = [
         "docker",
         "compose",
+        "--project-name",
+        project_name(
+            target.directory.resolve().relative_to(target.repository.resolve()).as_posix(),
+            target.repository,
+        ),
         "--project-directory",
         str(target.directory),
         "-f",
@@ -40,6 +47,37 @@ def compose(
         capture_output=capture_output,
         environment=environment,
     )
+
+
+def compose_file(
+    path: Path,
+    arguments: Sequence[str],
+    *,
+    repository: Path,
+    project: str,
+) -> subprocess.CompletedProcess[str]:
+    return run(
+        [
+            "docker",
+            "compose",
+            "--project-name",
+            project_name(project, repository),
+            "--project-directory",
+            str(path.parent),
+            "-f",
+            str(path),
+            *arguments,
+        ],
+        cwd=repository,
+    )
+
+
+def project_name(label: str, repository: Path) -> str:
+    """Return a stable Compose project name scoped to one checkout."""
+    normalized = re.sub(r"[^a-z0-9_-]+", "-", label.lower()).strip("-_")
+    identity = f"{repository.resolve()}\0{label}".encode()
+    suffix = hashlib.sha256(identity).hexdigest()[:12]
+    return f"{normalized[:40]}-{suffix}"
 
 
 def compose_ps(target: HardwareTarget, *, include_all: bool = False) -> list[dict]:
@@ -101,6 +139,30 @@ def compose_ps(target: HardwareTarget, *, include_all: bool = False) -> list[dic
     )
     owned_ids = set(owned.stdout.splitlines())
     return [container for container in containers if container["ID"] in owned_ids]
+
+
+def published_port(
+    target: HardwareTarget,
+    service: str,
+    *,
+    containers: Sequence[dict] | None = None,
+) -> int:
+    if containers is None:
+        containers = compose_ps(target)
+    publishers = [
+        publisher
+        for container in containers
+        if container["Service"] == service
+        for publisher in container.get("Publishers") or []
+        if publisher.get("Protocol") == "tcp" and publisher.get("PublishedPort")
+    ]
+    ports = {int(publisher["PublishedPort"]) for publisher in publishers}
+    if len(ports) != 1:
+        raise DockerError(
+            f"Expected one published port for {service!r} in {target.compose_file}, "
+            f"found {sorted(ports)}"
+        )
+    return ports.pop()
 
 
 def running_compose_container_ids(compose_file: Path) -> list[str]:
@@ -172,11 +234,7 @@ def gpu_available(image: str) -> tuple[bool, str]:
 
 
 def runtime_environment() -> dict[str, str]:
-    environment = os.environ.copy()
-    environment.setdefault(
-        "HF_CACHE_DIR", str(Path.home() / ".cache" / "huggingface")
-    )
-    return environment
+    return os.environ.copy()
 
 
 def run(

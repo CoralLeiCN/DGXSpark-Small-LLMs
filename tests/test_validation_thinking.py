@@ -4,6 +4,7 @@ from dataclasses import replace
 import pytest
 import yaml
 
+from inferpack import cli, docker
 from inferpack.cli import _validate_chat, _validate_responses
 from inferpack.manifest import ManifestError, load_manifest
 
@@ -44,3 +45,18 @@ def test_embedding_manifest_rejects_thinking_toggle(monkeypatch):
     monkeypatch.setattr("inferpack.manifest.yaml.safe_load", lambda _: data)
     with pytest.raises(ManifestError, match="requires text-generation"):
         load_manifest(manifest.identifier)
+
+
+def test_validate_uses_the_running_service_port(monkeypatch):
+    seen = {}
+    monkeypatch.setattr(docker, "published_port", lambda target, service: 31000)
+    monkeypatch.setattr(
+        cli,
+        "_validate",
+        lambda manifest, port, timeout: seen.update(port=port, timeout=timeout),
+    )
+
+    assert cli.main([
+        "validate", "gemma-4-e4b-it", "--target", "dgx-spark", "--timeout", "7",
+    ]) == 0
+    assert seen == {"port": 31000, "timeout": 7.0}

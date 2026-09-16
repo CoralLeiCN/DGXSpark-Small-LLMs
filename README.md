@@ -152,7 +152,9 @@ on disk. Unrelated services and containers created from other checkout paths are
 outside its scope. If a shutdown fails, it attempts the remaining services and
 returns an error. Use `make start MODEL=...` to start again.
 
-Linked Git worktrees count as different checkouts. A model started from a Codex
+Linked Git worktrees count as different checkouts. The CLI gives each checkout
+distinct Compose projects, so starting or stopping a pack in one worktree does
+not replace or stop the same pack in another. A model started from a Codex
 worktree can therefore remain running after `infer stop-all` reports zero in
 the main checkout. Use `docker ps` for a host-wide inventory and inspect the
 container's `com.docker.compose.project.working_dir` label to find its owning
@@ -211,6 +213,8 @@ background. Model downloads are stored in the host Hugging Face cache and are
 not baked into the image.
 
 `validate` uses the endpoint selected by the model manifest.
+It discovers the selected pack's actual running published port, including target
+`.env` and exported shell overrides.
 `validate-responses` explicitly tests the OpenAI-compatible `/v1/responses`
 endpoint. Responses API is the primary application path for recipes whose
 engine supports it, including Qwen3.8.

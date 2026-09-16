@@ -349,6 +349,11 @@ are outside its scope. It attempts remaining containers after failures and retur
 nonzero if discovery or shutdown fails. Stopped containers, images, caches,
 networks, and persistent monitoring volumes are retained.
 
+The CLI assigns deterministic Compose project names from the resolved checkout
+path and pack identity. Model and monitoring commands in one checkout therefore
+cannot recreate, stop, or attach to the same pack in another checkout. All CLI
+operations for a checkout reuse its project name and persistent volumes.
+
 `monitoring/` owns one Docker Compose deployment of Prometheus and Grafana,
 independent of the model packs. Dev and prod share this stack; Prometheus scrape
 target labels (`environment`, `model`, `engine`, `hardware`) identify workloads.
@@ -393,6 +398,9 @@ metrics and dashboards; alert routing is not configured.
 - Serving runs in containers with Docker and NVIDIA container runtime support.
 - The host uses `uv` and Python 3.12 only for lightweight repository tooling.
 - Models may require credentials, so `.env` files remain local and uncommitted.
+- Exported variables override target `.env` values; otherwise Compose loads the
+  target `.env`, including `HF_CACHE_DIR` and published-port overrides. Validation
+  reads the running container's published port rather than reconstructing it.
 - Model downloads persist in a host Hugging Face cache and are not baked into
   the image.
 - vLLM and SGLang versions may differ by model and target.

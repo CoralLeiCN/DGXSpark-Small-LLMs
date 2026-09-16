@@ -17,6 +17,7 @@ class ManifestError(ValueError):
 @dataclass(frozen=True)
 class HardwareTarget:
     name: str
+    repository: Path
     directory: Path
     compose_file: Path
     port: int
@@ -139,6 +140,7 @@ def load_manifest(identifier: str, root: Path | None = None) -> ModelManifest:
             host = _required_mapping(raw_target, "host")
             targets[target_name] = HardwareTarget(
                 name=target_name,
+                repository=root,
                 directory=compose_file.parent,
                 compose_file=compose_file,
                 port=_required_int(raw_target, "port"),
