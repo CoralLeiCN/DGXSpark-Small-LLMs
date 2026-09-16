@@ -6,9 +6,9 @@ Deployment recipe:
 Follow the [journal guide](../../../README.md). Each row links to one immutable
 experiment turn; later turns link back to the observations they continue.
 
-Runs recorded: 24
+Runs recorded: 25
 
-Next run ID: `RUN-0025`
+Next run ID: `RUN-0026`
 
 | Run ID | Time (UTC) | Status | Outcome |
 | --- | --- | --- | --- |
@@ -17,6 +17,7 @@ Next run ID: `RUN-0025`
 | `RUN-0003` | 2026-09-04T08:42:53Z | resolved | [API connection reset during warm-cache startup](2026-09-04T08-42-53Z-api-reset-during-startup.md) |
 | `RUN-0004` | 2026-09-07T12:40:39Z | open | [Concurrent model startup distorts available cache budget](2026-09-07T12-40-39Z-concurrent-start-memory-profiling.md) |
 | `RUN-0005` | 2026-09-07T12:47:42Z | resolved | [Sequential startup qualifies 45 percent allocation](2026-09-07T12-47-42Z-reduced-memory-qualified.md) |
+| `RUN-0025` | 2026-09-07T22:33:33Z | resolved | [Readiness probes reset until warm-cache startup completed](2026-09-07T22-33-33Z-readiness-probes-before-warmup.md) |
 | `RUN-0006` | 2026-09-14T19:47:23Z | resolved | [Benchmark GPU inspection requires host access](2026-09-14T19-47-23Z-benchmark-host-preflight.md) |
 | `RUN-0007` | 2026-09-14T19:49:45Z | resolved | [Reuse cached AIPerf after sandbox DNS failure](2026-09-14T19-49-45Z-aiperf-offline-client.md) |
 | `RUN-0008` | 2026-09-14T19:52:51Z | workaround | [Warm-cache startup qualified for benchmarking](2026-09-14T19-52-51Z-benchmark-startup-qualified.md) |
