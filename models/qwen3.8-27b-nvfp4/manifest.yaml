@@ -1,0 +1,27 @@
+id: qwen3.8-27b-nvfp4
+name: Qwen3.8 27B NVFP4
+provider: nvidia
+modalities: [text, image, video]
+
+model:
+  source: huggingface
+  repo: nvidia/Qwen3.8-27B-NVFP4
+  served_name: qwen3.8-27b-nvfp4
+
+engines:
+  sglang:
+    targets:
+      dgx-spark:
+        status: experimental
+        image: dgxspark/qwen3.8-27b-nvfp4-sglang:0.1.0
+        base_image: lmsysorg/sglang:dev-qwen38-27b-dflash2
+        base_image_env: SGLANG_BASE_IMAGE
+        compose: sglang/targets/dgx-spark/compose.yaml
+        port: 30000
+        host:
+          architectures: [aarch64, arm64]
+
+validation:
+  endpoint: /v1/responses
+  prompt: "Reply with exactly this text and nothing else: DGX Spark NVFP4 ready"
+  max_tokens: 512
