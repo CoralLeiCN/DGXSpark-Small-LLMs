@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+model_id="${QWEN_NVFP4_MODEL_ID:-nvidia/Qwen3.8-27B-NVFP4}"
+
+# HF_CACHE_DIR is the cache root used by this repository's Compose recipes.
+# Hugging Face expects the equivalent setting in HF_HOME and creates its
+# standard "hub" subdirectory beneath it.
+if [[ -n "${HF_CACHE_DIR:-}" ]]; then
+  export HF_HOME="${HF_CACHE_DIR}"
+fi
+
+exec uvx --python 3.12 --from "huggingface-hub>=1.0,<2" \
+  hf download "${model_id}" "$@"

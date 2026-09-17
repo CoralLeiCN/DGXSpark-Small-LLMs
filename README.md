@@ -92,6 +92,22 @@ infer stop qwen3.8-27b-fp8 --engine sglang --target dgx-spark
 See the [model recipe](models/qwen3.8-27b-fp8/README.md) for the DGX
 Spark memory assumptions and configuration controls.
 
+## Qwen3.8 27B NVFP4
+
+The NVIDIA-quantized recipe serves
+[`nvidia/Qwen3.8-27B-NVFP4`](https://huggingface.co/nvidia/Qwen3.8-27B-NVFP4)
+with SGLang:
+
+```bash
+scripts/download-qwen3.8-27b-nvfp4
+infer deploy qwen3.8-27b-nvfp4 --engine sglang --target dgx-spark
+infer validate-responses qwen3.8-27b-nvfp4 --engine sglang --target dgx-spark --timeout 600
+infer stop qwen3.8-27b-nvfp4 --engine sglang --target dgx-spark
+```
+
+See the [model recipe](models/qwen3.8-27b-nvfp4/README.md) for the mixed
+NVFP4/FP8 checkpoint details and DGX Spark configuration controls.
+
 ## Tomoro ColQwen3 Embed 4B
 
 An experimental SGLang pack for
