@@ -234,9 +234,10 @@ For a future benchmark, start the desired pack with
 `make start MODEL=<model-slug>`; this rebuilds it, enables both metrics flags,
 and registers its actual API port with Prometheus. Wait for readiness, send
 the appropriate generation or embedding workload, and allow at least two
-scrapes before reading the TFLOPS panel. The existing AIPerf runners still
-disable client-side GPU telemetry and server-metric collection; Prometheus
-records this counter independently while the monitoring stack is running.
+scrapes before reading the TFLOPS panel. AIPerf runners can collect client-side
+GPU telemetry and, when configured, benchmark-window server metrics in their
+own artifacts; Prometheus records this counter independently while the
+monitoring stack is running.
 
 The qualified Gemma runtime exports `sglang:inter_token_latency_seconds` for
 token intervals. The dashboard uses that histogram; it does not assume the

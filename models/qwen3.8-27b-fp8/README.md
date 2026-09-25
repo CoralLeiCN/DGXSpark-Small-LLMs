@@ -154,19 +154,27 @@ behind the existing scheduler cap.
 `QWEN_BENCHMARK_ROOT` selects a new artifact directory; by default, JSON/CSV
 summaries, per-request records, generated inputs, and logs go under the pack's
 ignored `artifacts/` directory. Existing output directories are not overwritten.
+For a requested concurrency `N`, the runner writes the reports to
+`<benchmark-root>/cN/`: `profile_export_aiperf.json` and
+`profile_export_aiperf.csv` contain aggregate results, while
+`profile_export.jsonl` contains one record per request. The latter includes
+`output_token_throughput_per_user`, from which the minimum, P5, and P1 per-user
+decode speeds can be calculated. The runner's console log is
+`<benchmark-root>/cN.log`.
 
 This is a short synthetic text baseline. It does not measure natural stopping,
 reasoning, multimodal inputs, long contexts, or sustained production capacity.
 Prefix caching remains enabled and is not flushed; different seeds are used
 for each concurrency. The current server does not report cache-read tokens,
-so AIPerf cannot quantify prefix-cache hits. Warmups are excluded, and client
-GPU telemetry and server-metric collection are disabled. The runner does not
-start, stop, or reconfigure services.
+so AIPerf cannot quantify prefix-cache hits. Warmups are excluded. The runner
+collects client-side GPU telemetry through NVML, while server-metric collection
+remains disabled. The runner does not start, stop, or reconfigure services.
 
 A [host telemetry check](../../docs/experiments/qwen3.8-27b-fp8/sglang/dgx-spark/2026-09-14T22-48-06Z-gpu-telemetry-support.md)
 verified GPU temperature, utilisation, and power draw on GB10 with driver
 `580.173.02`. GPU memory used/total returned `N/A` on the shared-memory device.
-Collection through AIPerf itself remains unverified.
+AIPerf records the supported NVML telemetry in its per-profile artifacts; inspect
+the fields before comparing runs because availability can vary by driver and GPU.
 
 ### Estimated model TFLOPS
 

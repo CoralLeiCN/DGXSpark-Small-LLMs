@@ -111,13 +111,19 @@ the whole service; it is different from the generation speed of one request.
 The recipe defaults to four running requests, so concurrency above four mainly
 adds queueing unless that server setting changes.
 
-This command collects client-observed endpoint performance. It disables server
-metrics and GPU telemetry collection; neither is required to measure the API.
+This command collects client-observed endpoint performance and client-side GPU
+telemetry through NVML. It disables server-metric collection; server metrics are
+not required to measure the API. Inspect the available telemetry fields before
+comparing runs because availability can vary by driver and GPU.
 
-AIPerf writes `profile_export_aiperf.json` and CSV reports into each artifact
-directory. The saved runner uses 96 requests per setting; the initial comparison
-below used 32. These are short baselines with limited support for tail-latency
-estimates. For a capacity study, increase the request count,
+AIPerf writes reports to `<benchmark-root>/cN/` for each requested concurrency
+`N`: `profile_export_aiperf.json` and `profile_export_aiperf.csv` contain
+aggregate results, while `profile_export.jsonl` contains one record per request.
+The JSONL field `output_token_throughput_per_user` supports calculating the
+minimum, P5, and P1 per-user decode speeds. The runner's console log is
+`<benchmark-root>/cN.log`. The saved runner uses 96 requests per setting; the
+initial comparison below used 32. These are short baselines with limited support
+for tail-latency estimates. For a capacity study, increase the request count,
 repeat each setting, and use representative prompt/output lengths. Record the
 image digest, engine version, launch settings, client location, other GPU load,
 and cache conditions. The example varies the seed between concurrency levels

@@ -89,7 +89,7 @@ for concurrency in "$@"; do
     --extra-inputs '{"temperature":0,"ignore_eos":true,"chat_template_kwargs":{"enable_thinking":false}}' \
     --concurrency "$concurrency" --warmup-request-count "$warmup_count" --request-count "$request_count" \
     --random-seed "$((seed_base + concurrency))" \
-    --no-server-metrics --no-gpu-telemetry --ui-type none \
+    --no-server-metrics --gpu-telemetry pynvml --ui-type none \
     --artifact-dir "$benchmark_root/c$concurrency" \
     > "$benchmark_root/c$concurrency.log" 2>&1; then
     tail -40 "$benchmark_root/c$concurrency.log"
