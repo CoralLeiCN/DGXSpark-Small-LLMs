@@ -5,9 +5,10 @@ model_id="${MODEL_ID:-nvidia/Qwen3.8-27B-NVFP4}"
 served_name="${SERVED_MODEL_NAME:-qwen3.8-27b-nvfp4}"
 port="${SGLANG_CONTAINER_PORT:-30000}"
 context_length="${CONTEXT_LENGTH:-32768}"
-mem_fraction="${MEM_FRACTION_STATIC:-0.45}"
-max_running_requests="${MAX_RUNNING_REQUESTS:-4}"
+mem_fraction="${MEM_FRACTION_STATIC:-0.70}"
+max_running_requests="${MAX_RUNNING_REQUESTS:-72}"
 chunked_prefill_size="${CHUNKED_PREFILL_SIZE:-2048}"
+max_mamba_cache_size="${MAX_MAMBA_CACHE_SIZE:-360}"
 
 args=(
   python3 -m sglang.launch_server
@@ -25,6 +26,7 @@ args=(
   --mamba-full-memory-ratio 4.59
   --mamba-radix-cache-strategy extra_buffer
   --mamba-ssm-dtype float32
+  --max-mamba-cache-size "${max_mamba_cache_size}"
   --max-running-requests "${max_running_requests}"
   --reasoning-parser qwen3
   --tool-call-parser qwen3_coder
