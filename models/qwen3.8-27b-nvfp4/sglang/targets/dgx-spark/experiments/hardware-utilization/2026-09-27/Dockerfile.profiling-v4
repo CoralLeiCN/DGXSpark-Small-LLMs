@@ -1,0 +1,7 @@
+# Verify this local tag resolves to image ID sha256:110ad45e7872397f337ea5714e6c97c400852938a9b8f258bcc27cab07182b0c before building.
+FROM dgxspark/qwen3.8-27b-nvfp4-sglang:0.1.0
+
+# Diagnostic image only. The normal baseline used the unchanged parent image.
+RUN /opt/sglang/bin/uv pip install --python /opt/sglang/bin/python --no-deps nvtx==0.2.16 \
+    && /opt/sglang/bin/uv run --offline --no-project --python /opt/sglang/bin/python \
+       python -c "import nvtx; from importlib.metadata import version; assert version('nvtx') == '0.2.16'; print(nvtx.__file__)"

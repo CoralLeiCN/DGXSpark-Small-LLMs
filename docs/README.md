@@ -11,6 +11,9 @@ and deployment-pack journals. [BENCHMARKING.md](BENCHMARKING.md) defines mandato
 performance-experiment rules for every model, engine, and hardware target,
 including NVIDIA guidance, request budgets, validation, and artifact retention.
 
+[Final performance reports](reports/README.md) consolidate completed results and
+analysis in a dedicated, maintained location, with links to the original journals.
+
 The important rule:
 
 > Each `model + engine + hardware target` pack owns its Docker environment.
@@ -80,6 +83,9 @@ DGXSpark-Small-LLMs/
 |                   `-- tests/
 `-- docs/
     |-- README.md
+    |-- reports/
+    |   |-- README.md
+    |   `-- <model>/<engine>/<hardware>/<date>-<topic>.md
     `-- experiments/
         |-- README.md
         `-- <model>/<engine>/<hardware>/

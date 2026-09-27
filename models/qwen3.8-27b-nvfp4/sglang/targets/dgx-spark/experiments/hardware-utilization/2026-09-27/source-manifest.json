@@ -1,0 +1,256 @@
+{
+  "artifact_root": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot",
+  "snapshot_scope": "Exact experiment snapshots, including failed attempts and prepared versions superseded before execution. Journal entries and artifact status files establish what ran.",
+  "files": [
+    {
+      "file": "Dockerfile.profiling-v2",
+      "sha256": "3381cce2365b22925b31a82d3cd804c4fc6e1e45a63632b5972c9f3932ec8b4b",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/Dockerfile.profiling-v2"
+    },
+    {
+      "file": "Dockerfile.profiling-v3",
+      "sha256": "85edd03867ddb2cd59564511db9aaf19a34e91e3e4ad213525480ad916cc3311",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/Dockerfile.profiling-v3"
+    },
+    {
+      "file": "Dockerfile.profiling-v4",
+      "sha256": "badc6f5bd91e4c5078d37147c656034eadcc3b6f35b15bd41c5cda6652e877f0",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/Dockerfile.profiling-v4"
+    },
+    {
+      "file": "Dockerfile.profiling-v5",
+      "sha256": "80b72cfe99973804b409fd5fc87240b7560c71ea1e84dd800e5e53ef0cace965",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/Dockerfile.profiling-v5"
+    },
+    {
+      "file": "Dockerfile.profiling-v6",
+      "sha256": "9aeffe14f2aa09eb708a7b7a22ff5842ff63506ba89ad6dad4958b263dcdd3b6",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/Dockerfile.profiling-v6"
+    },
+    {
+      "file": "analyze-baseline.py",
+      "sha256": "6da42f58affcf474999a5341a3bf4ace3e5ce5249c479928eaad0b5480b51734",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/analyze-baseline.py"
+    },
+    {
+      "file": "analyze-calibration-v2.py",
+      "sha256": "b8ae16e0dfd4b3ca2a3d00a7c024e071bd85cf1ead9268df5542f264e87fc9eb",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/analyze-calibration-v2.py"
+    },
+    {
+      "file": "analyze-calibration.py",
+      "sha256": "efbc83a05e81943d897f4f18517b758f17aa4c05dd15c0cd0414a4547ede1f2c",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/analyze-calibration.py"
+    },
+    {
+      "file": "analyze-nsys.py",
+      "sha256": "824b13bc80fde918d35624290edb55b1483be65a10d69e63c2f617c5f6ea9789",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/analyze-nsys.py"
+    },
+    {
+      "file": "analyze-selected-kernels-v2.py",
+      "sha256": "19e54d7d036ec5fc0df33a2f467f3fdaa0a6bc246439684fb5e063a8303fd8a1",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/analyze-selected-kernels-v2.py"
+    },
+    {
+      "file": "analyze-selected-kernels.py",
+      "sha256": "82673a9bac697c0ccb1610c8b6a982e1a84a621801efa37ee9a3d08593c625e0",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/analyze-selected-kernels.py"
+    },
+    {
+      "file": "analyze-timeline-kernels.py",
+      "sha256": "d0ba3839198eb771669ed66bb323ae1482c46136a19720907d7d6f3796734b1b",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/analyze-timeline-kernels.py"
+    },
+    {
+      "file": "bandwidth.cu",
+      "sha256": "42d1849a532c3e21eb789a256e64095331f8bb05cdbde286b0e22d73a4c57d17",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/bandwidth.cu"
+    },
+    {
+      "file": "baseline-v2.py",
+      "sha256": "93599ad9b4d8bf858a7935bd87146e46b48a8755fbe8691ffefc4d59867df4be",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/baseline-v2.py"
+    },
+    {
+      "file": "baseline-v3.py",
+      "sha256": "96b5a82320ba6199eada98deb1eb2485c4d2118115b11e5a2f79a322bd6110b2",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/baseline-v3.py"
+    },
+    {
+      "file": "baseline.py",
+      "sha256": "b9d2d4dfa15a8ac7fa21cff7da29a8184821d659c11525faba1f596595fc7a9c",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/baseline.py"
+    },
+    {
+      "file": "calibrate-app-range-v2.sh",
+      "sha256": "104dbff24fa4555c2f603144c83e4776eafbed1a6ca6699c3709486a8abde7b8",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/calibrate-app-range-v2.sh"
+    },
+    {
+      "file": "calibrate-app-range-v3.sh",
+      "sha256": "f20f49f79caa9fccc6e15c2de79bab7b6a7620cadf9ebc5294fb673edad5b4c1",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/calibrate-app-range-v3.sh"
+    },
+    {
+      "file": "calibrate-app-range.sh",
+      "sha256": "b1ce59c04d8a7b813d4363c46f2e2e8874ebc645ae2e4ad644ccc589aae0a9cb",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/calibrate-app-range.sh"
+    },
+    {
+      "file": "calibrate-bandwidth.sh",
+      "sha256": "3cf9670ec2450d8d6bb2a204972b5a7cededf1104de68bafae1862bedf1ff79a",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/calibrate-bandwidth.sh"
+    },
+    {
+      "file": "calibrate-fp4.sh",
+      "sha256": "dc351098921d97d067485b12d95aee7ea6e4f18da84868ac12c96f8202a766a0",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/calibrate-fp4.sh"
+    },
+    {
+      "file": "calibrate-fp8.sh",
+      "sha256": "02999c2a6cab2413d7c0fc372fec685ce193f427c0cc1ecfe1fed587cca722d6",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/calibrate-fp8.sh"
+    },
+    {
+      "file": "enable-forward-nvtx.py",
+      "sha256": "fa6f137e17cc839bdb13f9991c8b94151a1905fd84893676021885895084eb84",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/enable-forward-nvtx.py"
+    },
+    {
+      "file": "export-nsys.py",
+      "sha256": "595a3cd52efdffdc665780e09f3eb15d5999fd04ece59351a0a21c55b7c4f3a5",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/export-nsys.py"
+    },
+    {
+      "file": "extract-ncu.py",
+      "sha256": "67f60df2c23103acecf6cda322d83d9e5771c5641772e9b0680052994bae1886",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/extract-ncu.py"
+    },
+    {
+      "file": "fp4.py",
+      "sha256": "d066875dd2b130e25cd70b7d26ef35a38a134b4a3accecac2630c364f1e36a0f",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/fp4.py"
+    },
+    {
+      "file": "fp8.py",
+      "sha256": "1e84478a544083416b8230c91b0ffc143d41f85ece00a26e945dc923469376f6",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/fp8.py"
+    },
+    {
+      "file": "inspect_fp4.py",
+      "sha256": "76f221cd0a804c0205e08bfc96c03e1f8a20d890baf767ee7c030953db26c527",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/inspect_fp4.py"
+    },
+    {
+      "file": "inspect_image.py",
+      "sha256": "ca20079130bbfabde4c7c462de397c25b1c4e3567674b493ac5ab08f15953398",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/inspect_image.py"
+    },
+    {
+      "file": "log-forward-shapes.py",
+      "sha256": "00d5c37970c55c02de7e60fe18337a03bb74e27eda85622a8e991a27560c017d",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/log-forward-shapes.py"
+    },
+    {
+      "file": "orchestrate-v2.py",
+      "sha256": "56d0eaf25e4ad584f0805600438d6a3680cdfebcf67a28e837f0db8a793c0f60",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/orchestrate-v2.py"
+    },
+    {
+      "file": "orchestrate-v3.py",
+      "sha256": "8df244feed061026bc0fb279bd1aaf574ec4c73f31756a7e822bd9efbff89eb0",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/orchestrate-v3.py"
+    },
+    {
+      "file": "orchestrate-v4.py",
+      "sha256": "b9e6d9c0c112d3b1cacace3dce46e9c584eac94ea7ba939819e6b9bc3e40ad16",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/orchestrate-v4.py"
+    },
+    {
+      "file": "orchestrate-v5.py",
+      "sha256": "559522ba658681baba34895ca8ed8aac2dfbd6b75eb34332c6aefe6eff5eda2b",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/orchestrate-v5.py"
+    },
+    {
+      "file": "orchestrate-v6.py",
+      "sha256": "8a270b833fd03673b7f686ac62eba8356b9559ddb4b8ebcd7e84b9e30b186178",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/orchestrate-v6.py"
+    },
+    {
+      "file": "orchestrate-v7.py",
+      "sha256": "a59ceba9935c7335b74e9cf9751304e4aaa9a44a3f891de6c7ae8fcb2ac2b62e",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/orchestrate-v7.py"
+    },
+    {
+      "file": "orchestrate-v8.py",
+      "sha256": "a83dd19f836da1dc20bc8cf18e3510194c6407e6c80edeadb801e34d370f659c",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/orchestrate-v8.py"
+    },
+    {
+      "file": "orchestrate-v9.py",
+      "sha256": "80a9770aad224934fedcb153dde8d4123e7c839f58e5adb46dadf7f894eeae6a",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/orchestrate-v9.py"
+    },
+    {
+      "file": "orchestrate.py",
+      "sha256": "640d0ba214a4681b1a4a21a34d6b1bc64f4729db5ccee8a4cb0ba4a27003e916",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/orchestrate.py"
+    },
+    {
+      "file": "profiles-v2.py",
+      "sha256": "2669390662a991e2977a123d9b176fc2b53bef8eb03255419debfc466b29b2c4",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/profiles-v2.py"
+    },
+    {
+      "file": "profiles-v3.py",
+      "sha256": "0976dcec7eb833a51383663cb7146f644b08f0e0d57de3edc30f24b4bff40891",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/profiles-v3.py"
+    },
+    {
+      "file": "profiles-v4.py",
+      "sha256": "cb0f79c1a8545fbb6fd6ec9f36a60789ae844e28a75b502fef7aca9cf48aed5d",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/profiles-v4.py"
+    },
+    {
+      "file": "profiles-v5.py",
+      "sha256": "be2b1ec11f1102c2404830ddb29f3f0deef3b6ad1542ca934d9e520e80aebfb0",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/profiles-v5.py"
+    },
+    {
+      "file": "profiles-v6.py",
+      "sha256": "a40b3d98343f5a0dfbf54213eb0930dee2eb89dde9c4ac003222d803f96d1ff8",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/profiles-v6.py"
+    },
+    {
+      "file": "profiles-v7.py",
+      "sha256": "9c425640b82f9aa994a8c788efb88c2d457089698483839e81f431514912855d",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/profiles-v7.py"
+    },
+    {
+      "file": "profiles-v8.py",
+      "sha256": "f42fc5495e18c6634d1b4dce62286f39cbd6eaf3b044f4afae9092269e17c03b",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/profiles-v8.py"
+    },
+    {
+      "file": "profiles.py",
+      "sha256": "0af452e4a2982cedaa22e31bc1b08e9036d3a0340fcefc3ed076196b5cf95bad",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/profiles.py"
+    },
+    {
+      "file": "record-shutdown.py",
+      "sha256": "e67d061cc304d5f3c94f6ae43dd5d48f09174d48f8697d042dbe753b1955ebf8",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/record-shutdown.py"
+    },
+    {
+      "file": "smoke.py",
+      "sha256": "b4f7f404f1bb214146a712a9ecf2193a2c0938956902588a17de49adca26972c",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/smoke.py"
+    },
+    {
+      "file": "validate-pilot.py",
+      "sha256": "eab812b6970e4d3839d9089cdaeeff1063178974d41aa6eccd95a7a5c4ba189d",
+      "source": "/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/scripts/validate-pilot.py"
+    }
+  ]
+}

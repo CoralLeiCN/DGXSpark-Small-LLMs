@@ -240,6 +240,8 @@ All inference performance tests follow the shared
 separate warmup, repeated trials, matched comparisons, and saved client/GPU/engine
 metrics. These rules apply across models, engines, and hardware targets.
 
+Consolidated benchmark findings are in the [final performance reports](docs/reports/README.md).
+
 Architecture details and design decisions are in
 [docs/SPEC.md](docs/SPEC.md). Failed Docker and inference runs, their diagnoses,
 and verified fixes are kept in the

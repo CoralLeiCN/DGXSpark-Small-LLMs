@@ -1,0 +1,3 @@
+set -e
+uv run --offline --no-project --python /opt/sglang/bin/python /work/scripts/fp4.py > /work/calibration/fp4-unprofiled.jsonl 2> /work/calibration/fp4-unprofiled.stderr
+/opt/nvidia/nsight-compute/2025.3.1/ncu --target-processes all --profile-from-start off --cache-control none --clock-control none --metrics gpu__time_duration.sum,sm__ops_path_tensor_src_fp4_dst_fp32.sum,sm__ops_path_tensor_src_fp4_fp6_dst_fp32.sum,sm__pipe_tensor_cycles_active.avg.pct_of_peak_sustained_elapsed --export /work/calibration/fp4-ncu uv run --offline --no-project --python /opt/sglang/bin/python /work/scripts/fp4.py profile > /work/calibration/fp4-ncu.log 2>&1

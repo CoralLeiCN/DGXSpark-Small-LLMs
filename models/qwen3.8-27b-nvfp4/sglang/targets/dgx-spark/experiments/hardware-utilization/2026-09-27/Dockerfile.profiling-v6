@@ -1,0 +1,4 @@
+# Parent image c53f031f6a2e retains the qualified NVTX bridge.
+FROM nvfp4-hw-pilot-forward-nvtx:20260927
+COPY log-forward-shapes.py /opt/dgxspark/log-forward-shapes.py
+RUN /opt/sglang/bin/uv run --offline --no-project --python /opt/sglang/bin/python /opt/dgxspark/log-forward-shapes.py

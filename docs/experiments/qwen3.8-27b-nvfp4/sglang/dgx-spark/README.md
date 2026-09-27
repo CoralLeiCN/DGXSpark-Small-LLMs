@@ -2,6 +2,10 @@
 
 Deployment recipe: [`models/qwen3.8-27b-nvfp4/sglang/targets/dgx-spark/`](../../../../../models/qwen3.8-27b-nvfp4/sglang/targets/dgx-spark/)
 
+The consolidated [MTP=2 hardware-utilization final report](../../../../reports/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27-mtp2-hardware-utilization.md)
+includes the calibration density table. See the [final reports index](../../../../reports/README.md)
+for the maintained report location.
+
 **2026-09-20 NVFP4 benchmark baseline: MTP disabled (non-speculative decoding).**
 All completed 2026-09-20 profiles, including the c1–c72 sweep, recorded
 `sglang:spec_num_steps=0`. FP8 MTP results belong to the separate FP8 journal.
@@ -28,9 +32,13 @@ uses the new MTP=2 results in a 100-trial comparison. MTP=3 had the fastest obse
 means at c1–c8, MTP=2 at c16–c48, and the historical disabled baseline at c64–c72.
 The close MTP peaks and different cache conditions do not establish a universal winner.
 
-Runs recorded: 33
+Runs recorded: 48
 
-Next run ID: `RUN-0034`
+Next run ID: `RUN-0049`
+
+Four independently numbered notes from worktree`7a44` are preserved in the
+[closed fork archive](forks/7a44/README.md). They retain their original IDs under
+that archive's scope; they are separate from the canonical run count and next ID.
 
 Preserved benchmark data and report copies:
 [`$HOME/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/`](/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/README.md).
@@ -72,3 +80,18 @@ for its file inventory and integrity verification.
 | `RUN-0031` | 2026-09-27T12:18:25Z | resolved | [NVFP4 aligned MTP=2 sweep ended and shutdown was checked](2026-09-27T12-18-25Z-mtp2-aligned-suite-ended.md) |
 | `RUN-0032` | 2026-09-27T12:18:25Z | resolved | [NVFP4 aligned MTP=2: final monitor and shutdown check](2026-09-27T12-18-25Z-mtp2-aligned-monitor-finished.md) |
 | `RUN-0033` | 2026-09-27T13:24:43Z | resolved | [Final NVFP4 summary with aligned MTP=2](2026-09-27T13-24-43Z-final-aligned-mtp-summary.md) |
+| `RUN-0034` | 2026-09-27T14:07:18Z | resolved | [Hardware counter access and GB10 calibration](2026-09-27T14-07-18Z-hardware-counter-calibration.md) |
+| `RUN-0035` | 2026-09-27T14:07:18Z | open | [MTP=2 fresh-cache c1/c8/c64 baseline launched](2026-09-27T14-07-18Z-hardware-pilot-baseline-launch.md) |
+| `RUN-0036` | 2026-09-27T14:11:53Z | open | [Hardware pilot: warmup CLI fix and preserved retry](2026-09-27T14-11-53Z-hardware-pilot-warmup-cli-retry.md) |
+| `RUN-0037` | 2026-09-27T14:24:57Z | open | [Hardware pilot qualified; isolated graph profiling scheduled](2026-09-27T14-24-57Z-hardware-pilot-qualified-and-profiling-scheduled.md) |
+| `RUN-0038` | 2026-09-27T14:29:32Z | open | [Retain completed c1 trial; fix lazy cache-counter validation and resume](2026-09-27T14-29-32Z-hardware-pilot-cache-metric-recovery.md) |
+| `RUN-0039` | 2026-09-27T15:00:27Z | resolved | [Fresh-cache c1/c8/c64 baseline: nine trials, 960 requests, service stopped](2026-09-27T15-00-27Z-hardware-pilot-baseline-complete.md) |
+| `RUN-0040` | 2026-09-27T15:04:30Z | open | [NVTX dependency and Docker build recovery; annotated profiling restarted](2026-09-27T15-04-30Z-hardware-pilot-nvtx-profiling-retry.md) |
+| `RUN-0041` | 2026-09-27T15:09:09Z | open | [Correct offline AIPerf cache; preflight client before profiler startup](2026-09-27T15-09-09Z-hardware-pilot-offline-client-cache-retry.md) |
+| `RUN-0042` | 2026-09-27T15:25:54Z | open | [Three timelines captured; enable detailed forward labels for counter sessions](2026-09-27T15-25-54Z-hardware-pilot-timelines-and-forward-annotations.md) |
+| `RUN-0043` | 2026-09-27T15:40:46Z | open | [Calibrate whole-range counters after intrusive per-kernel capture; restart remaining sessions](2026-09-27T15-40-46Z-hardware-pilot-application-range-calibration.md) |
+| `RUN-0044` | 2026-09-27T15:49:27Z | open | [Range-profiler startup OOM; retry with diagnostic memory headroom](2026-09-27T15-49-27Z-hardware-pilot-range-profiler-memory-headroom.md) |
+| `RUN-0045` | 2026-09-27T15:54:02Z | open | [Fixed Mamba budget rejected0.75; restore0.90 and cap diagnostic KV at65536](2026-09-27T15-54-02Z-hardware-pilot-fixed-mamba-budget-kv-cap.md) |
+| `RUN-0046` | 2026-09-27T16:05:09Z | open | [Full-range warmup OOM; bounded representative-kernel recovery](2026-09-27T16-05-09Z-hardware-pilot-bounded-kernel-recovery.md) |
+| `RUN-0047` | 2026-09-27T16:23:13Z | workaround | [Hardware-utilization report: normal trials, calibrated counters, selected kernels and shutdown](2026-09-27T16-23-13Z-hardware-utilization-final-report.md) |
+| `RUN-0048` | 2026-09-27T17:50:18Z | resolved | [Calibration table with ideal arithmetic intensity and Spark hardware balance](2026-09-27T17-50-18Z-calibration-arithmetic-intensity.md) |

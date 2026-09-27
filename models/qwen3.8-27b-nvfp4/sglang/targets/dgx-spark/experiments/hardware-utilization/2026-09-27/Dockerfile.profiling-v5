@@ -1,0 +1,4 @@
+# Parent is the verified NVTX0.2.16 image, sha256:3081c11204b7dd0f3010900bf96244fc11712ca0c37ed92cb97f3c4ee1e8165e.
+FROM nvfp4-hw-pilot-nvtx:20260927
+COPY enable-forward-nvtx.py /opt/dgxspark/enable-forward-nvtx.py
+RUN /opt/sglang/bin/uv run --offline --no-project --python /opt/sglang/bin/python /opt/dgxspark/enable-forward-nvtx.py
