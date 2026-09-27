@@ -7,7 +7,9 @@ targets when qualified recipes are implemented.
 
 See [SPEC.md](SPEC.md) for the current architecture spec and
 [experiments/README.md](experiments/README.md) for the failed-run journal guide
-and deployment-pack journals.
+and deployment-pack journals. [BENCHMARKING.md](BENCHMARKING.md) defines mandatory
+performance-experiment rules for every model, engine, and hardware target,
+including NVIDIA guidance, request budgets, validation, and artifact retention.
 
 The important rule:
 

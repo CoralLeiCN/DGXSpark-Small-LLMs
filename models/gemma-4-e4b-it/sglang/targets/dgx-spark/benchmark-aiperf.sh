@@ -9,6 +9,9 @@ Benchmark the running Gemma E4B endpoint with AIPerf 0.12.0.
 Defaults: concurrency 4 6 8 12; 12 warmups and 96 measured requests per setting;
 512 target input tokens and 128 output tokens, streaming, temperature 0.
 
+These defaults reproduce the historical plateau sweep. New performance tests
+must follow docs/BENCHMARKING.md; this runner does not enforce that policy.
+
 BENCHMARK_URL        Server origin (default: http://127.0.0.1:30000)
 GEMMA_BENCHMARK_ROOT New output directory (default: artifacts/<UTC timestamp>-<suffix>
                     beside this script). Existing directories are not overwritten.

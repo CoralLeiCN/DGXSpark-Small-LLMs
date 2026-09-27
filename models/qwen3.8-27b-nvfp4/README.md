@@ -14,6 +14,73 @@ restarts or OOMs. Health, model discovery, exact-text Responses API generation,
 and parsed tool calling passed. Image and video requests, long-context capacity,
 and broad production throughput remain unqualified.
 
+**MTP (Multi-Token Prediction) is disabled in the current recipe defaults and
+the 2026-09-20 NVFP4 benchmark results.** Those completed profiles used
+ordinary, non-speculative decoding; their SGLang metrics report
+`sglang:spec_num_steps=0` throughout. This includes the full c1–c72 sweep and
+its 221.74 output tokens/s peak at c64. The FP8 MTP experiments are a separate
+configuration; NVFP4 MTP results are identified separately.
+
+On 2026-09-25, a separate [NVFP4 MTP=2 round](../../docs/experiments/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-25T20-24-59Z-mtp2-c72-round.md)
+passed text/Responses API smoke checks and confirmed 72-request admission. Its
+full c1–c72 sweep [completed successfully](../../docs/experiments/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-26T00-25-10Z-mtp2-sweep-completed.md),
+and the service was stopped before the next round. Here **MTP=2 means two drafting steps**:
+EAGLE, `--speculative-num-steps 2`, top-k 1, and three verification positions
+(`--speculative-num-draft-tokens 3`). The native head comes from the same pinned
+NVFP4 checkpoint. To accommodate its temporary state, this experiment uses
+`extra_buffer_lazy`, 288 persistent Mamba slots, and static-memory fraction 0.90;
+float32 Mamba state and FP8 KV precision are retained. These memory-setting
+differences must accompany comparisons with the MTP-disabled baseline.
+GPU telemetry and SGLang estimated-FLOPs/MTP exports were verified in a separate
+short profile before launching the full sweep. Results and status are saved
+[outside Git](/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-25T20-24-59Z-mtp2-c72/README.md).
+The cached image's older launcher requires explicit `--max-mamba-cache-size`
+through `SGLANG_EXTRA_ARGS`; setting the newer environment variable alone does
+not configure that older image.
+
+The [MTP=3 then MTP=1 suite](../../docs/experiments/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-26T00-25-10Z-mtp13-suite-launch.md)
+uses three trials per concurrency under the shared benchmarking rules. Both
+variants use admission64 and 256 persistent Mamba slots to accommodate MTP=3's
+larger temporary state. Client c72 is therefore an overload point. The suite
+retains all client/GPU/SGLang metrics and estimated-TFLOPS summaries
+[outside Git](/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-26T00-12-44Z-mtp1-mtp3/README.md),
+and stops its experiment services at completion or failure. Comparisons with the
+earlier MTP=2 round must disclose the changed admission, cache, and sample counts.
+
+Both rounds completed successfully and their services were stopped. The
+[final comparison of MTP disabled, MTP=1, MTP=2, and MTP=3](../../docs/experiments/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-26T08-06-38Z-mtp-disabled-1-2-3-final-report.md)
+contains all concurrency tables, trial variation, GPU/queue metrics, estimated
+TFLOPS accounting, and charts. MTP=3 led the observed low-concurrency averages;
+the disabled configuration led at c64–c72. Cache, admission, memory allocation,
+sampling, and baseline checkpoint provenance limit causal comparisons.
+
+The [September 27 MTP=2 rerun](../../docs/experiments/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T11-01-08Z-mtp2-aligned-launch.md)
+aligns with MTP=1/3: three trials of `max(64, 3C)` requests per concurrency,
+`max(8, C)` warmups before trial1, admission64, 256 Mamba slots, the same pinned
+runtime/model and generated inputs, and retained native cache across repeat passes.
+Its [dedicated archive](/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T10-59-11Z-mtp2-aligned/README.md)
+contains status, all raw metrics, and per-trial cache measurements. This deliberately
+reproduces the earlier first/repeat-pass procedure; combined means do not establish
+repeatability under one cache condition. First and repeat passes are reported
+separately, and available cache capacity may still differ by MTP setting.
+
+That aligned MTP=2 rerun completed all 30 trials and shut down automatically.
+The [updated final summary](../../docs/experiments/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-24-43Z-final-aligned-mtp-summary.md)
+replaces the earlier MTP=2 measurements in the current comparison: its highest
+observed three-pass mean is 246.72 output tokens/s at c48, with 24.60s mean response
+and 26.26 estimated TFLOPS/GPU. Its first c48 pass achieved 199.46 tokens/s with
+zero measured prompt reuse; repeated passes reached 263.38 and 277.31 tokens/s.
+MTP=3 still led the observed low-concurrency means. The disabled baseline has not
+been rerun under the newer protocol, and pooled MTP means mix cache conditions.
+
+The
+[MTP=1 results and cache analysis](../../docs/experiments/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-26T06-54-00Z-mtp1-results-cache-assessment.md)
+report a highest observed mean of 240.66 output tokens/s at c48, with 25.68s mean
+response time. Prompt reuse changed between trials: c48 ranged from 194.97 to
+278.75 tokens/s as measured cache reuse increased. These combined averages
+describe the completed workload; they do not establish a stable optimum or an
+isolated MTP speedup. Estimated TFLOPS also reflects the changing prompt workload.
+
 On 2026-09-20 UTC, a synthetic streaming AIPerf profile completed with 72 client
 connections and zero request errors. The former memory configuration admitted
 only 33 running requests, so that profile remains a 72-client load test rather
@@ -101,6 +168,12 @@ FP8 KV-cache tokens, and completed cold startup in 183.60 seconds. The Mamba
 cache used 0.46 GB for convolution state and 23.62 GB for SSM state.
 
 ## Benchmark With AIPerf
+
+New performance experiments must follow the repository-wide
+[benchmarking rules](../../docs/BENCHMARKING.md). The runner's fixed 384 measured
+requests and 96 warmups preserve the original baseline protocol. For a new
+exploratory sweep, resolve per-concurrency counts and the trial plan from the
+shared policy; already-started rounds keep their declared protocol.
 
 The NVFP4 runner permits client concurrency through the recipe's requested
 72-request scheduler cap; it does not assert that SGLang can admit all 72

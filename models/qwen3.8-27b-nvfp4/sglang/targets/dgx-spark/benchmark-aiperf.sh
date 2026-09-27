@@ -10,6 +10,9 @@ Defaults: a capacity sweep through the configured maximum of 72 concurrent
 requests: 1 2 4 8 16 32 48 56 64 72. Each setting uses 96 warmups and 384
 measured requests, with 512 target input tokens and 128 output tokens.
 
+These defaults reproduce the historical baseline. New performance tests must
+follow docs/BENCHMARKING.md; this runner does not enforce that policy.
+
 BENCHMARK_URL                 Server origin (default: http://127.0.0.1:30000)
 QWEN_NVFP4_BENCHMARK_ROOT     New output directory (default: <tag>-<suffix> under
                               $HOME/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/).

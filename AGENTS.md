@@ -18,6 +18,12 @@
   the relevant authoritative spec, guide, or model documentation as they arise.
 - If the user corrects an architectural direction, update its authoritative
   documentation rather than keeping a separate duplicate correction history.
+- Follow `docs/BENCHMARKING.md` for every inference performance experiment across
+  all models, quantizations, engines, and hardware targets, including ad hoc runs.
+  Use its concurrency-scaled request budget, separate warmup, repeated-trial or
+  declared convergence protocol, matched comparisons, and metric/artifact rules.
+  Distinguish NVIDIA guidance from repository choices; record justified protocol
+  exceptions and do not let historical runner defaults silently override the rules.
 - Maintain append-only inference experiment journals under
   `docs/experiments/<model>/<engine>/<hardware>/` by following
   `docs/experiments/README.md`.

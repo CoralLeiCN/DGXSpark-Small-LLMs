@@ -9,6 +9,9 @@ Benchmark the running Qwen3.8 27B FP8 endpoint with AIPerf 0.12.0.
 Defaults: concurrency 1 2 4; 4 warmups and 32 measured requests per setting;
 512 target input tokens and 128 output tokens, streaming, thinking disabled.
 
+These defaults reproduce the historical baseline. New performance tests must
+follow docs/BENCHMARKING.md; this runner does not enforce that policy.
+
 BENCHMARK_URL        Server origin (default: http://127.0.0.1:30000)
 QWEN_BENCHMARK_ROOT  New output directory (default: artifacts/<UTC>-<suffix>
                      beside this script). Existing directories are not overwritten.

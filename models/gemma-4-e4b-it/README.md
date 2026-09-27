@@ -60,6 +60,11 @@ generic attention/MLP estimate.
 
 ## Benchmark With AIPerf
 
+New performance experiments must follow the repository-wide
+[benchmarking rules](../../docs/BENCHMARKING.md). The runner defaults below
+reproduce the established plateau sweep; choose and record the shared policy's
+budget and trial plan for new work rather than inheriting those counts.
+
 Use AIPerf as an isolated HTTP benchmark client; the model continues running in
 its SGLang container. The example below targets **Gemma 4 E4B**, using API model
 name `gemma-4-e4b-it` and tokenizer `google/gemma-4-E4B-it`. The saved

@@ -235,6 +235,11 @@ It discovers the selected pack's actual running published port, including target
 endpoint. Responses API is the primary application path for recipes whose
 engine supports it, including Qwen3.8.
 
+All inference performance tests follow the shared
+[benchmarking rules](docs/BENCHMARKING.md): concurrency-scaled request budgets,
+separate warmup, repeated trials, matched comparisons, and saved client/GPU/engine
+metrics. These rules apply across models, engines, and hardware targets.
+
 Architecture details and design decisions are in
 [docs/SPEC.md](docs/SPEC.md). Failed Docker and inference runs, their diagnoses,
 and verified fixes are kept in the
