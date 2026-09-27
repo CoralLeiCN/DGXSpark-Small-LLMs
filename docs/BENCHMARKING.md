@@ -115,12 +115,29 @@ The following are repository requirements for every performance run:
   SGLang or vLLM metrics appropriate to the installed version, including queueing,
   cache use, admission, and speculative acceptance when available. Record missing
   or unsupported telemetry explicitly; missing measurements are not zero.
+  In the pinned SGLang build, a zero-reuse workload may never emit a labeled
+  cached-token counter. When available, verify reuse from the difference between
+  total-prompt and uncached-prompt histogram sum deltas, requiring both histogram
+  count deltas to match the completed request count over the same interval.
+  This supplies independent evidence; absence of the cached-token series alone
+  does not establish zero reuse.
 - When the engine exposes estimated FLOPs, retain timestamped raw counters and
   compute estimated TFLOPS/GPU as `delta(FLOPs/GPU) / seconds / 1e12` over the
   measured phase. Check counter resets, units, aggregation, and accounting for
   draft/verification work. Label estimates distinctly from hardware FLOPs/MFU.
   SGLang's Prometheus `sglang:estimated_flops_per_gpu_total` appears as
   `sglang:estimated_flops_per_gpu` in the observed AIPerf JSONL exports.
+- Do not interpret estimated read/write-byte counters as measured DRAM traffic.
+  Inspect their implementation: the observed SGLang estimator uses server dtype
+  sizes and charges weight reads per token, without modeling packed NVFP4 weights
+  or their reuse across a batch. Preserve these estimates with their limitations;
+  do not divide their rates by hardware bandwidth to claim utilization.
+  NVIDIA [NVML memory utilization](https://docs.nvidia.com/deploy/nvml-api/api/structnvmlUtilization__t.html)
+  measures the fraction of time memory is active, not achieved GB/s. An all-zero
+  activity series during inference does not establish zero traffic. A bandwidth
+  headroom claim requires supported hardware byte counters and a defined time
+  interval, with prefill/decode distinguished. Keep intrusive profiling separate
+  from the benchmark used for client latency and throughput comparisons.
 - Save raw artifacts in a dedicated directory outside Git and disposable
   worktrees, normally `$HOME/inference-artifacts/<model>/<engine>/<hardware>/`.
   Use a unique experiment directory and retain every trial and failed attempt.

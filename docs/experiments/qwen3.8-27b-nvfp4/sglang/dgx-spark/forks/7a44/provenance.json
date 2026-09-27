@@ -1,0 +1,32 @@
+{
+  "source_worktree": "7a44",
+  "source_head": "89611e1bea0e44298d9672ed686f931ed983fe24",
+  "main_at_sync": "1e0117f36f6918bba08eeb7a005dd1ccd2d40c08",
+  "source_stash": "8b120a2cd2d5c2c017553062ad594bbb1c76b32d",
+  "entries": [
+    {
+      "original_id": "RUN-0027",
+      "file": "2026-09-27T11-02-08Z-flops-bandwidth-accounting.md",
+      "original_sha256": "dd3c83b9c265f197ef2daab5f618a390f1744063d1ac3e3fc94764593feec34b",
+      "link_repair": "Shared MTP=2 launch link now points two directories upward."
+    },
+    {
+      "original_id": "RUN-0028",
+      "file": "2026-09-27T11-02-08Z-mtp2-aligned-protocol.md",
+      "original_sha256": "8c4ad0ca578f42e795d037a21fec19cf260c4c0ab68168ad995435832ab6e7e7",
+      "link_repair": "Shared MTP=2 launch link now points two directories upward."
+    },
+    {
+      "original_id": "RUN-0029",
+      "file": "2026-09-27T11-05-46Z-mtp2-existing-run-preserved.md",
+      "original_sha256": "2cb44b20b1e8e3358616a39267cec1d655756cba76f996111a1cbf6dd5c3d42e",
+      "link_repair": "Shared MTP=2 launch link now points two directories upward."
+    },
+    {
+      "original_id": "RUN-0030",
+      "file": "2026-09-27T11-12-31Z-bandwidth-profiler-capability.md",
+      "original_sha256": "e8a57aa5e326b166883572887e5763ef1ec3724df4aaf77dd93c52cfe11149d9",
+      "link_repair": "Shared MTP=2 launch link now points two directories upward."
+    }
+  ]
+}

@@ -81,6 +81,13 @@ response time. Prompt reuse changed between trials: c48 ranged from 194.97 to
 describe the completed workload; they do not establish a stable optimum or an
 isolated MTP speedup. Estimated TFLOPS also reflects the changing prompt workload.
 
+The [metric-accounting audit](../../docs/experiments/qwen3.8-27b-nvfp4/sglang/dgx-spark/forks/7a44/2026-09-27T11-02-08Z-flops-bandwidth-accounting.md)
+confirms that neither estimated FLOPs/bytes counters nor saved NVML activity
+establish physical DRAM bandwidth or distance from its limit. The
+[profiler capability check](../../docs/experiments/qwen3.8-27b-nvfp4/sglang/dgx-spark/forks/7a44/2026-09-27T11-12-31Z-bandwidth-profiler-capability.md)
+records the installed GB10 counter and permission limitations. These notes retain
+their original IDs in the [7a44 fork archive](../../docs/experiments/qwen3.8-27b-nvfp4/sglang/dgx-spark/forks/7a44/README.md).
+
 On 2026-09-20 UTC, a synthetic streaming AIPerf profile completed with 72 client
 connections and zero request errors. The former memory configuration admitted
 only 33 running requests, so that profile remains a 72-client load test rather
@@ -174,6 +181,35 @@ New performance experiments must follow the repository-wide
 requests and 96 warmups preserve the original baseline protocol. For a new
 exploratory sweep, resolve per-concurrency counts and the trial plan from the
 shared policy; already-started rounds keep their declared protocol.
+
+The **MTP=2 hardware-utilization pilot** completed its normal inference
+measurements on 2026-09-27 at client concurrency **1, 8, and 64**:
+
+| Concurrency | Measured requests per trial | Trials | Total measured requests |
+| --- | ---: | ---: | ---: |
+| 1 | 64 | 3 | 192 |
+| 8 | 64 | 3 | 192 |
+| 64 | 192 | 3 | 576 |
+
+This is nine trials and **960 measured requests**, with warmup excluded. The run
+retained the pinned aligned MTP=2 configuration, 512-token input target and 128
+forced output tokens. The idle cache was flushed before each measured trial;
+paired prompt histograms verified zero cached prompt tokens. Hardware profiling uses
+separate diagnostic captures so profiler overhead does not enter these normal
+latency/throughput measurements. The [baseline completion record](../../docs/experiments/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T15-00-27Z-hardware-pilot-baseline-complete.md)
+reports 21.808/106.644/202.545 output tokens/s at c1/c8/c64, respectively.
+The [final hardware report](../../docs/reports/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27-mtp2-hardware-utilization.md)
+adds calibrated bandwidth/GEMM references, GPU timelines and 12 selected kernel
+samples. Physical DRAM utilization and whole-server hardware MFU remain
+unavailable; all pilot services were stopped after validation.
+The [updated calibration table](../../docs/reports/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27-mtp2-hardware-utilization.md#hardware-limits-and-local-calibration)
+adds ideal arithmetic intensity in FLOP/byte, including NVFP4 block scales and
+BF16 output traffic, alongside Spark's dense FP4 hardware balance.
+
+The pilot's [retained execution and validation scripts](sglang/targets/dgx-spark/experiments/hardware-utilization/README.md)
+include the original attempts, recovery runners, calibration code, profiler
+drivers and offline analysis. Their manifest records the archived source hashes;
+raw metrics and profiles remain in the dedicated external artifact directory.
 
 The NVFP4 runner permits client concurrency through the recipe's requested
 72-request scheduler cap; it does not assert that SGLang can admit all 72

@@ -11,6 +11,15 @@ warmup, available telemetry, artifact directory, and any justified exception.
 Historical journals preserve the protocol actually used; do not rewrite them
 to imply compliance with a later policy.
 
+## Final Reports
+
+Keep consolidated final reports in
+`docs/reports/<model>/<engine>/<hardware>/<YYYY-MM-DD>-<topic>.md` and list them in
+the [reports index](../reports/README.md). Link the report from the model README
+and target journal index. Maintain report clarifications and table additions in
+that document; preserve the dated journal entries as evidence. New experiment
+observations still belong in new journal entries and should be cited by the report.
+
 ## Journal Location
 
 Each deployable `model + engine + hardware target` pack owns an indexed
