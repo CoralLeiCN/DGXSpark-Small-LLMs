@@ -76,6 +76,11 @@ after workload-specific concurrency and host-memory validation.
 
 ## Performance Benchmark
 
+New performance experiments must follow the repository-wide
+[benchmarking rules](../../docs/BENCHMARKING.md). Historical results and the
+runner's baseline/`auto` defaults below retain their original protocols. Resolve
+the shared policy's per-concurrency budget and trial plan explicitly for new work.
+
 On 2026-09-14, the existing FP8 recipe on one DGX Spark produced these AIPerf
 results with thinking disabled and 128 output tokens per request:
 

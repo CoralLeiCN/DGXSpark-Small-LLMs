@@ -4,6 +4,13 @@ These journals turn failed Docker and model-serving experiments into reusable
 guidance for building reliable inference services. They preserve what happened,
 why it happened, what changed, and how the result was verified.
 
+Every performance experiment also follows the shared
+[benchmarking rules](../BENCHMARKING.md), across all models and engines. Record
+the selected sampling/trial protocol, resolved per-concurrency counts, separate
+warmup, available telemetry, artifact directory, and any justified exception.
+Historical journals preserve the protocol actually used; do not rewrite them
+to imply compliance with a later policy.
+
 ## Journal Location
 
 Each deployable `model + engine + hardware target` pack owns an indexed

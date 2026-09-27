@@ -47,6 +47,15 @@ Other engines require a new technical evaluation and an explicit project-scope
 decision. An individual model target must not introduce another engine on its
 own.
 
+## Performance Benchmarking
+
+All inference performance experiments follow [BENCHMARKING.md](BENCHMARKING.md),
+including model-specific runners and ad hoc commands. That guide owns the
+NVIDIA-based sampling and comparison rules, repository request-count floor,
+warmup and repeated-trial requirements, and metrics/artifact retention policy.
+Existing reproduction defaults must not silently set the protocol for new work.
+Correctness and API smoke checks retain their task-specific validation budgets.
+
 ## Non-goals
 
 The repository does not try to support every inference engine or deployment
