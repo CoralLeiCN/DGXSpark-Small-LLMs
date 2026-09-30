@@ -4,7 +4,7 @@ Run ID: `RUN-0002`
 
 - Status: resolved
 - Phase: model load and inference
-- Related turns: [Official runtime image restored GPU preflight semantics](2026-09-05T21-22-01Z-official-runtime-preflight.md)
+- Related turns: [Runtime base and startup fixes](../../../../RESOLVED_ISSUES.md#runtime-base-and-startup)
 - Repo revision: `4fe8345` plus uncommitted Gemma recipe and journal changes
 - Host/GPU: DGX Spark, NVIDIA GB10, ARM64, 124610 MiB unified memory reported by PyTorch, Linux `6.17.0-1031-nvidia`
 - Container: `dgxspark/gemma-4-26b-a4b-it-sglang:0.1.0` (`sha256:1ea5c92343e3caba5f9c71face3c97845779052d6ebf564aeff516ea8e30fe02`), based on `lmsysorg/sglang:dev-qwen38-27b-dflash2` (`sha256:616a3e97f45191af975896cfa644279096cb31bd408a071c2e99ca7209c3cafe`)

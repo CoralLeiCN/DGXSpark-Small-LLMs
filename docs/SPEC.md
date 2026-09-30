@@ -235,11 +235,19 @@ Every deployment identity has an indexed, append-only journal at:
 docs/experiments/<model>/<engine>/<hardware>/
 ```
 
-Each experiment turn has one immutable UTC-timestamped Markdown file and a
-stable target-local sequential ID such as `RUN-0001`. Later diagnosis or
-verification goes in a new linked turn with the next ID. Model READMEs describe
-the stable recipe; journals preserve the observed investigation history for a
-specific hardware target.
+Each substantive experiment turn has one immutable UTC-timestamped Markdown
+file and a stable target-local sequential ID such as `RUN-0001`. Apply the
+[journal inclusion and cleanup rules](experiments/README.md) before assigning
+an ID. Later diagnosis or verification gets a new linked turn when it adds
+material evidence; routine lifecycle events and corrected diagnostic mistakes
+stay in artifacts or the relevant investigation. User-requested cleanup may
+delete trivial entries and consolidate implemented fixes in
+[resolved issues](RESOLVED_ISSUES.md), preserving useful dated evidence and
+updating links directly without compatibility stubs or retirement registries.
+Keep benchmark results and unresolved findings; preserve the next-ID counter
+without renumbering retained turns.
+Model READMEs describe the stable recipe; journals preserve substantive
+investigation history for a specific hardware target.
 
 ## Manifest Schema
 

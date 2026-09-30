@@ -9,7 +9,7 @@ start and stop.
 Qualified on DGX Spark with Prometheus 3.13.3, Grafana 13.2.1, and the Gemma
 SGLang development build on 2026-09-09: all ten dashboard queries passed, and
 349 generated tokens matched the exporter counter increase exactly. See the
-[validation journal](../docs/experiments/gemma-4-26b-a4b-it/sglang/dgx-spark/2026-09-09T22-19-44Z-shared-monitoring-qualified.md).
+[consolidated verification](../docs/RESOLVED_ISSUES.md#monitoring-queries-and-mfu-counters).
 
 ## Start
 
@@ -192,7 +192,7 @@ rate(sglang:estimated_flops_per_gpu_total{job="sglang"}[1m]) / 1e12
 The panel keeps each scheduler series separate and applies the Environment and
 Model filters. It averages over wall time, including idle time, and requires
 at least two scrapes. An absent counter displays no data. Both `--enable-metrics`
-and `--enable-mfu-metrics` are required. All six DGX Spark packs add the latter
+and `--enable-mfu-metrics` are required. All seven DGX Spark packs add the latter
 automatically when metrics are enabled, including through `make start`. Existing
 extra arguments are preserved, and an explicit MFU flag is not duplicated.
 Direct launches with metrics disabled do not turn on MFU collection.
@@ -202,23 +202,17 @@ cached image: SGLang `0.5.15.post1` for Nemotron and
 `0.0.0.dev1+g5f55db35e` for both Gemmas, Qwen3.8, and both embedding packs.
 Overriding a pack's SGLang version or base image requires rechecking compatibility.
 
-All six packs passed sequential live validation on GB10 with their recipe defaults
+The six packs tested on 2026-09-14 passed sequential live validation on GB10 with their recipe defaults
 and metrics enabled: readiness, configured inference validation, increasing FLOP
 counters, and positive rates through Prometheus and the Grafana data source. Both
 embedding packs also passed their live service and numerical reference tests.
 
-| Model | Live validation | Evidence |
-| --- | --- | --- |
-| `qwen3-embedding-8b` | Passed | [RUN-0003](../docs/experiments/qwen3-embedding-8b/sglang/dgx-spark/2026-09-14T23-20-51Z-mfu-live-validation.md) |
-| `tomoro-colqwen3-embed-4b` | Passed | [RUN-0007](../docs/experiments/tomoro-colqwen3-embed-4b/sglang/dgx-spark/2026-09-14T23-24-32Z-mfu-live-validation.md) |
-| `gemma-4-e4b-it` | Passed | [RUN-0008](../docs/experiments/gemma-4-e4b-it/sglang/dgx-spark/2026-09-14T23-27-13Z-mfu-live-validation.md) |
-| `gemma-4-26b-a4b-it` | Passed | [RUN-0012](../docs/experiments/gemma-4-26b-a4b-it/sglang/dgx-spark/2026-09-14T23-30-13Z-mfu-live-validation.md) |
-| `nvidia-nemotron-3-nano-30b-a3b-nvfp4` | Passed | [RUN-0011](../docs/experiments/nvidia-nemotron-3-nano-30b-a3b-nvfp4/sglang/dgx-spark/2026-09-14T23-42-50Z-mfu-live-validation.md) |
-| `qwen3.8-27b-fp8` | Passed | [RUN-0024](../docs/experiments/qwen3.8-27b-fp8/sglang/dgx-spark/2026-09-14T23-46-12Z-mfu-live-validation.md) |
+The [consolidated verification](../docs/RESOLVED_ISSUES.md#monitoring-queries-and-mfu-counters)
+lists the models, original verification times, and fixes.
 
 The 11 previously provisioned dashboard panel queries returned finite data for
 Gemma 4 26B at its
-[recorded validation time](../docs/experiments/gemma-4-26b-a4b-it/sglang/dgx-spark/2026-09-14T23-37-29Z-all-dashboard-panels.md).
+[recorded validation time](../docs/RESOLVED_ISSUES.md#monitoring-queries-and-mfu-counters).
 The two cached-input panels were added later and have not yet been live-validated.
 Qwen3.8 additionally passed an earlier check with native MTP enabled. These checks
 validate telemetry plumbing; their rates are not sustained benchmark results.

@@ -4,7 +4,7 @@ Run ID: `RUN-0046`
 
 - Status: open
 - Phase: inference warmup / profiling
-- Related turn: [KV-cap attempt, RUN-0045](2026-09-27T15-54-02Z-hardware-pilot-fixed-mamba-budget-kv-cap.md)
+- Related turn: [Mamba and diagnostic KV budget fixes](../../../../RESOLVED_ISSUES.md#mamba-and-diagnostic-kv-budgets)
 - Repo: `f3f1d2e`, dirty; GB10 SM12.1, driver580.173.02, CUDA13.0.
 - Image: `sha256:7c694cc214888ed37c1eba40e3be4d8e82c6516faeaf4ccb23d0833369169b92`; SGLang `0.0.0.dev1+g5f55db35e`, FlashInfer0.6.17, AIPerf0.12.0, Nsight Compute2025.3.1.0.
 - Model: `nvidia/Qwen3.8-27B-NVFP4`, revision `482ca0f3832238542f8f5295dde86b5f22711d80`, MTP2/top-k1/3 verification positions.

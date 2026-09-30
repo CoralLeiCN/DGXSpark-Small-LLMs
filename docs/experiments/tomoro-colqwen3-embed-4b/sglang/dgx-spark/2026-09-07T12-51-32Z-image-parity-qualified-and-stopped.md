@@ -4,7 +4,7 @@ Run ID: `RUN-0006`
 
 - Status: resolved
 - Phase: inference validation / shutdown
-- Related turns: [Image parity failure](2026-09-07T12-42-18Z-image-reference-parity.md) (RUN-0005), [Reference loader failure](2026-09-07T12-39-09Z-reference-local-module-path.md) (RUN-0004)
+- Related context: [Tomoro reference and image-parity fixes](../../../../RESOLVED_ISSUES.md#tomoro-reference-loading-and-image-parity)
 - Repo revision: f58941b plus reviewed interpolation, reference-loader, memory and port fixes
 - Host/GPU: DGX Spark GB10; driver 580.173.02, CUDA 13.0; Qwen3.8 healthy at 0.45 allocation
 - Container: dgxspark/tomoro-colqwen3-embed-4b-sglang:0.1.0, image sha256:ec60e67cb5c556ea42de579634d284e11ee0337cb06f3d5f9bfe1531e786eccf

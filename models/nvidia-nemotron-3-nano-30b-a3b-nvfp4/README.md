@@ -16,7 +16,7 @@ base layer and does not pull it again. The model image then installs the exact
 stable Torch family required by its pinned SGLang release.
 
 Keep the normal build network mode when reusing this image's dependency cache.
-A [build check](../../docs/experiments/nvidia-nemotron-3-nano-30b-a3b-nvfp4/sglang/dgx-spark/2026-09-14T23-10-07Z-mfu-metrics-build-cache.md)
+A [build check](../../docs/RESOLVED_ISSUES.md#execution-access)
 found that `--network none` missed the cached install layer; the normal retry reused it.
 
 ```bash
@@ -88,7 +88,7 @@ start monitoring, and register the service for scraping. The shared
 shows **Estimated model TFLOPS per GPU** from
 `rate(sglang:estimated_flops_per_gpu_total[1m]) / 1e12` (using the dashboard's
 selected filters and rate window). This is a wall-time model estimate, not
-measured hardware throughput. [Live validation](../../docs/experiments/nvidia-nemotron-3-nano-30b-a3b-nvfp4/sglang/dgx-spark/2026-09-14T23-42-50Z-mfu-live-validation.md)
+measured hardware throughput. [Live validation](../../docs/RESOLVED_ISSUES.md#monitoring-queries-and-mfu-counters)
 passed for final-answer generation, counter increments, and the
 Prometheus/Grafana query with the bounded reasoning-disabled smoke request.
 

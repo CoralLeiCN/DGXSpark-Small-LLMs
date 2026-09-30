@@ -175,7 +175,7 @@ so AIPerf cannot quantify prefix-cache hits. Warmups are excluded. The runner
 collects client-side GPU telemetry through NVML, while server-metric collection
 remains disabled. The runner does not start, stop, or reconfigure services.
 
-A [host telemetry check](../../docs/experiments/qwen3.8-27b-fp8/sglang/dgx-spark/2026-09-14T22-48-06Z-gpu-telemetry-support.md)
+A [host telemetry check](../../docs/RESOLVED_ISSUES.md#nemotron-jit-and-memory-discovery)
 verified GPU temperature, utilisation, and power draw on GB10 with driver
 `580.173.02`. GPU memory used/total returned `N/A` on the shared-memory device.
 AIPerf records the supported NVML telemetry in its per-profile artifacts; inspect
@@ -198,10 +198,10 @@ not measured FP8 throughput or a reliable hardware MFU percentage. AIPerf's
 benchmark runner still disables server-metric collection; Prometheus collects
 the counter independently when monitoring is running.
 
-[Live verification with ordinary decoding](../../docs/experiments/qwen3.8-27b-fp8/sglang/dgx-spark/2026-09-14T23-46-12Z-mfu-live-validation.md)
+[Live verification with ordinary decoding](../../docs/RESOLVED_ISSUES.md#monitoring-queries-and-mfu-counters)
 passed Responses and Chat Completions inference, counter increments, and the
 TFLOPS query through Prometheus and Grafana. An
-[earlier check with native MTP](../../docs/experiments/qwen3.8-27b-fp8/sglang/dgx-spark/2026-09-14T22-54-51Z-sglang-estimated-tflops.md)
+[earlier check with native MTP](../../docs/RESOLVED_ISSUES.md#monitoring-queries-and-mfu-counters)
 also passed inference and the Prometheus rate query.
 
 ## Native MTP Speculative Decoding
@@ -327,7 +327,7 @@ utilization assumptions.
 A direct Spark-hosted comparison checked the same day is AxForge's Qwen3.8
 27B NVFP4 API at €0.29/M input and €1.77/M output, before VAT. Applied to our
 FP8 token rates, that represents €2.21/hour in gross API-equivalent value.
-The [Spark API and rental price reference](../../docs/experiments/qwen3.8-27b-fp8/sglang/dgx-spark/2026-09-14T22-33-51Z-spark-hosted-api-pricing.md)
+The [Spark API and rental price reference](pricing-2026-09-14.md)
 records the primary sources, quantization difference, and separate rental rates.
 
 ## Source Settings

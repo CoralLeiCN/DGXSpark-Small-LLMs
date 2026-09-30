@@ -3,7 +3,7 @@
 Run ID: `RUN-0039`
 
 - Status: resolved (normal baseline only; hardware diagnostics continue separately)
-- Related: [cache validation recovery](2026-09-27T14-29-32Z-hardware-pilot-cache-metric-recovery.md)
+- Related: [Hardware-pilot runner fixes](../../../../RESOLVED_ISSUES.md#hardware-pilot-runner-fixes)
 - Environment: same pinned model/image/SGLang/AIPerf as RUN-0035; repo f3f1d2e plus local scripts and documentation
 - Artifacts: [complete archive](/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/)
 

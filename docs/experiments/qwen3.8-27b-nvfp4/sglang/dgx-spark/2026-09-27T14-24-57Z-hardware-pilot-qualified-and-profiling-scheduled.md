@@ -3,7 +3,7 @@
 Run ID: `RUN-0037`
 
 - Status: open (normal baseline in progress)
-- Related: [CLI retry](2026-09-27T14-11-53Z-hardware-pilot-warmup-cli-retry.md), [calibration](2026-09-27T14-07-18Z-hardware-counter-calibration.md)
+- Related: [Hardware-pilot runner fixes](../../../../RESOLVED_ISSUES.md#hardware-pilot-runner-fixes), [calibration](2026-09-27T14-07-18Z-hardware-counter-calibration.md)
 - Artifacts: [2026-09-27T13-56-21Z-mtp2-hardware-pilot](/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/)
 - Environment: same pinned image/model/SGLang/AIPerf as RUN-0035; profiler versions from RUN-0034
 

@@ -4,7 +4,7 @@ Run ID: `RUN-0009`
 
 - Status: resolved
 - Phase: monitoring container configuration
-- Related turns: [Shared monitoring qualified](2026-09-09T22-19-44Z-shared-monitoring-qualified.md)
+- Related turns: [Monitoring fixes and verification](../../../../RESOLVED_ISSUES.md#monitoring-queries-and-mfu-counters)
 - Repo revision: `75d9507`, dirty; `codex/shared-inference-monitoring`
 - Host/GPU: remote DGX Spark; no GPU changes
 - Container: `grafana/grafana:13.2.1`; Prometheus `3.13.3`

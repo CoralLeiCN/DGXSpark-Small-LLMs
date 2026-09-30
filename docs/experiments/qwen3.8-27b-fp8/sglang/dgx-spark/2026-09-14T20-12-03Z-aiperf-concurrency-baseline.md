@@ -4,7 +4,7 @@ Run ID: `RUN-0010`
 
 - Status: resolved
 - Phase: inference / performance validation
-- Related turns: [tokenizer path failure](2026-09-14T19-54-00Z-aiperf-offline-tokenizer-path.md),
+- Related turns: [AIPerf client fixes](../../../../RESOLVED_ISSUES.md#aiperf-client-setup),
   [startup and runtime configuration](2026-09-14T19-52-51Z-benchmark-startup-qualified.md)
 - Repo revision: `17d39b06860ea7159a3d4a3443053b4d79bf867e`, dirty with benchmark
   runner, documentation, and journals

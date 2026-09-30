@@ -6,13 +6,17 @@ target NVIDIA DGX Spark; other hardware is represented by additional explicit
 targets when qualified recipes are implemented.
 
 See [SPEC.md](SPEC.md) for the current architecture spec and
-[experiments/README.md](experiments/README.md) for the failed-run journal guide
+[experiments/README.md](experiments/README.md) for journal inclusion and cleanup rules
 and deployment-pack journals. [BENCHMARKING.md](BENCHMARKING.md) defines mandatory
 performance-experiment rules for every model, engine, and hardware target,
 including NVIDIA guidance, request budgets, validation, and artifact retention.
 
 [Final performance reports](reports/README.md) consolidate completed results and
 analysis in a dedicated, maintained location, with links to the original journals.
+
+[Resolved serving and tooling issues](RESOLVED_ISSUES.md) consolidates implemented
+fixes and established workarounds, with code links and verification outcomes.
+Check it before repeating a known investigation or creating another journal.
 
 The important rule:
 
@@ -187,7 +191,8 @@ uses greedy sampling in this mode; server defaults are unchanged. See the
 6. Add the target under the matching manifest engine with its host constraints
    and qualification status.
 7. Start its append-only journal at
-   `docs/experiments/<model>/<engine>/<hardware>/` when experiments begin.
+   `docs/experiments/<model>/<engine>/<hardware>/` when a substantive failure,
+   qualification, or performance experiment meets the journal inclusion rules.
 
 Hardware slugs should describe a reproducible class, such as `dgx-spark` or
 `rtx-4080-16gb`, rather than an ambiguous marketing family.
