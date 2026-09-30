@@ -6,22 +6,19 @@ Deployment recipe:
 Follow the [journal guide](../../../README.md). Each row links to one immutable
 experiment turn; later turns link back to the observations they continue.
 
-Runs recorded: 25
+Resolved issues: [implemented fixes and established workarounds](../../../../RESOLVED_ISSUES.md).
+
+Runs recorded: 16
 
 Next run ID: `RUN-0026`
 
 | Run ID | Time (UTC) | Status | Outcome |
 | --- | --- | --- | --- |
-| `RUN-0001` | 2026-09-04T00:19:32Z | open | [Cold download exceeded the health-check grace period](2026-09-04T00-19-32Z-cold-download-health-timeout.md) |
-| `RUN-0002` | 2026-09-04T01:15:47Z | resolved | [Host API passed after retry outside the network sandbox](2026-09-04T01-15-47Z-host-api-validation.md) |
 | `RUN-0003` | 2026-09-04T08:42:53Z | resolved | [API connection reset during warm-cache startup](2026-09-04T08-42-53Z-api-reset-during-startup.md) |
 | `RUN-0004` | 2026-09-07T12:40:39Z | open | [Concurrent model startup distorts available cache budget](2026-09-07T12-40-39Z-concurrent-start-memory-profiling.md) |
 | `RUN-0005` | 2026-09-07T12:47:42Z | resolved | [Sequential startup qualifies 45 percent allocation](2026-09-07T12-47-42Z-reduced-memory-qualified.md) |
 | `RUN-0025` | 2026-09-07T22:33:33Z | resolved | [Readiness probes reset until warm-cache startup completed](2026-09-07T22-33-33Z-readiness-probes-before-warmup.md) |
-| `RUN-0006` | 2026-09-14T19:47:23Z | resolved | [Benchmark GPU inspection requires host access](2026-09-14T19-47-23Z-benchmark-host-preflight.md) |
-| `RUN-0007` | 2026-09-14T19:49:45Z | resolved | [Reuse cached AIPerf after sandbox DNS failure](2026-09-14T19-49-45Z-aiperf-offline-client.md) |
 | `RUN-0008` | 2026-09-14T19:52:51Z | workaround | [Warm-cache startup qualified for benchmarking](2026-09-14T19-52-51Z-benchmark-startup-qualified.md) |
-| `RUN-0009` | 2026-09-14T19:54:00Z | open | [AIPerf offline tokenizer rejects filesystem paths](2026-09-14T19-54-00Z-aiperf-offline-tokenizer-path.md) |
 | `RUN-0010` | 2026-09-14T20:12:03Z | resolved | [Streaming concurrency baseline qualified](2026-09-14T20-12-03Z-aiperf-concurrency-baseline.md) |
 | `RUN-0011` | 2026-09-14T20:12:24Z | resolved | [Benchmark shutdown emits cancellation traceback](2026-09-14T20-12-24Z-benchmark-shutdown-cleanup.md) |
 | `RUN-0012` | 2026-09-14T20:42:56Z | workaround | [Native FP8 MTP startup and API smoke checks qualified](2026-09-14T20-42-56Z-fp8-mtp-startup-qualified.md) |
@@ -33,7 +30,3 @@ Next run ID: `RUN-0026`
 | `RUN-0018` | 2026-09-14T22:06:18Z | resolved | [Intermediate concurrency checks retain the peak at 64](2026-09-14T22-06-18Z-mtp-throughput-refinement.md) |
 | `RUN-0019` | 2026-09-14T22:17:48Z | resolved | [Repeated profiles select 64 requests for peak MTP throughput](2026-09-14T22-17-48Z-mtp-throughput-peak-confirmed.md) |
 | `RUN-0020` | 2026-09-14T22:30:07Z | resolved | [Input throughput and API-equivalent value of the measured peak](2026-09-14T22-30-07Z-token-rates-api-value.md) |
-| `RUN-0021` | 2026-09-14T22:33:51Z | resolved | [DGX Spark hosted API and rental price references](2026-09-14T22-33-51Z-spark-hosted-api-pricing.md) |
-| `RUN-0022` | 2026-09-14T22:48:06Z | resolved | [Host GPU temperature, utilisation, and power queries verified](2026-09-14T22-48-06Z-gpu-telemetry-support.md) |
-| `RUN-0023` | 2026-09-14T22:54:51Z | resolved | [SGLang estimated TFLOPS counter and dashboard query verified](2026-09-14T22-54-51Z-sglang-estimated-tflops.md) |
-| `RUN-0024` | 2026-09-14T23:46:12Z | resolved | [Sequential MFU live validation](2026-09-14T23-46-12Z-mfu-live-validation.md) |

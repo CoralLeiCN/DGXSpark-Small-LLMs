@@ -5,7 +5,7 @@ Run ID: `RUN-0043`
 - Status: open (range calibration passed; inference collection restarting)
 - Phase: detailed profiling overhead, mode qualification and lifecycle
 - Related: [timelines and annotations](2026-09-27T15-25-54Z-hardware-pilot-timelines-and-forward-annotations.md)
-- Environment: same model/engine/tool pins as RUN-0040; Nsight Compute2025.3.1, driver580.173.02
+- Environment: [hardware-pilot environment](../../../../RESOLVED_ISSUES.md#hardware-pilot-runner-fixes); Nsight Compute2025.3.1, driver580.173.02
 - Artifacts: [archive](/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/)
 
 ## Observed overhead and interrupted capture

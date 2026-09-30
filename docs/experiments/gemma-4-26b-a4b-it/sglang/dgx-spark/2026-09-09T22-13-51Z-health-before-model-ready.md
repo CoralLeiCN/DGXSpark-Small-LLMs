@@ -4,7 +4,7 @@ Run ID: `RUN-0006`
 
 - Status: resolved
 - Phase: model load and health check
-- Related turns: [Service starting during inspection](2026-09-09T22-09-18Z-status-inspection-host-access.md)
+- Related context: [Host access and startup checks](../../../../RESOLVED_ISSUES.md#runtime-base-and-startup)
 - Repo revision: `75d9507c01e340b3f0873856449ff9301b44e130`, dirty
 - Host/GPU: DGX Spark target; engine reported 124610 MiB device memory
 - Container: `dgxspark/gemma-4-26b-a4b-it-sglang:0.1.0`

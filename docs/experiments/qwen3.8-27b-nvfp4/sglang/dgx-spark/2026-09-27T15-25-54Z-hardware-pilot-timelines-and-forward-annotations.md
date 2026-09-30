@@ -4,8 +4,8 @@ Run ID: `RUN-0042`
 
 - Status: open (Nsight Systems complete; detailed counter collection continuing)
 - Phase: hardware capture validation and profiling-only instrumentation
-- Related: [offline-client recovery](2026-09-27T15-09-09Z-hardware-pilot-offline-client-cache-retry.md)
-- Environment: same model/engine/profiler pins as RUN-0040; repo f3f1d2e plus local experiment files
+- Related: [Hardware-pilot runner fixes](../../../../RESOLVED_ISSUES.md#hardware-pilot-runner-fixes)
+- Environment: [hardware-pilot environment](../../../../RESOLVED_ISSUES.md#hardware-pilot-runner-fixes); repo f3f1d2e plus local experiment files
 - Artifacts: [archive](/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/)
 
 ## Completed timeline capture

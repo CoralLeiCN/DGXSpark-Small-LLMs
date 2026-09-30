@@ -5,7 +5,7 @@ Run ID: `RUN-0004`
 - Status: workaround (text serving qualified; GPU-capacity fallback and missing
   audio dependency remain)
 - Phase: engine startup / health check / inference
-- Related turns: [AIPerf client preflight](2026-09-13T21-46-37Z-aiperf-client-preflight.md),
+- Related turns: [AIPerf client fixes](../../../../RESOLVED_ISSUES.md#aiperf-client-setup),
   [initial text qualification](2026-09-05T23-07-59Z-text-api-qualified.md)
 - Repo revision: `0d0acca2289c8d0475ba3c8dab76b366e4f150da`, dirty with benchmark
   documentation changes

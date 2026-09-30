@@ -5,7 +5,7 @@ Run ID: `RUN-0044`
 - Status: open (reduced static-memory diagnostic retry starting)
 - Phase: model startup, health validation, profiling memory overhead
 - Related: [calibrated application-range mode](2026-09-27T15-40-46Z-hardware-pilot-application-range-calibration.md)
-- Environment: same model/engine/tool pins as RUN-0040; diagnostic image7c694cc21488 with NVTX/shape instrumentation
+- Environment: [hardware-pilot environment](../../../../RESOLVED_ISSUES.md#hardware-pilot-runner-fixes); diagnostic image7c694cc21488 with NVTX/shape instrumentation
 - Artifacts: [archive](/home/coral/inference-artifacts/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27T13-56-21Z-mtp2-hardware-pilot/)
 
 The first application-range inference server (ncu-fp4-v5) completed most startup

@@ -36,7 +36,7 @@ start monitoring, and register the service for scraping. The shared
 shows **Estimated model TFLOPS per GPU** from
 `rate(sglang:estimated_flops_per_gpu_total[1m]) / 1e12` (using the dashboard's
 selected filters and rate window). This is a wall-time model estimate, not
-measured hardware throughput. [Live validation](../../docs/experiments/tomoro-colqwen3-embed-4b/sglang/dgx-spark/2026-09-14T23-24-32Z-mfu-live-validation.md)
+measured hardware throughput. [Live validation](../../docs/RESOLVED_ISSUES.md#monitoring-queries-and-mfu-counters)
 passed for text/image inference, counter increments, and the Prometheus/Grafana
 query, including independent Transformers text/image reference comparisons.
 

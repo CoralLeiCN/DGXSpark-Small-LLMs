@@ -4,7 +4,7 @@ Run ID: `RUN-0003`
 
 - Status: resolved
 - Phase: model load and health check
-- Related turns: [Host API passed after retry outside the network sandbox](2026-09-04T01-15-47Z-host-api-validation.md)
+- Related turns: [Runtime base and startup fixes](../../../../RESOLVED_ISSUES.md#runtime-base-and-startup)
 - Repo revision: `def11da` plus uncommitted Qwen recipe and journal changes
 - Host/GPU: DGX Spark, NVIDIA GB10, 124610 MiB unified memory reported by PyTorch
 - Container: `dgxspark/qwen3.8-27b-fp8-sglang:0.1.0` (`sha256:1fe48564cd63becc4d5f4246ac6cd96fe84ac711e1aae51c7290fcb4b9d83a98`)

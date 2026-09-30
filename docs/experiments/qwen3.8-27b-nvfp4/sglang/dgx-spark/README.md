@@ -32,7 +32,9 @@ uses the new MTP=2 results in a 100-trial comparison. MTP=3 had the fastest obse
 means at c1–c8, MTP=2 at c16–c48, and the historical disabled baseline at c64–c72.
 The close MTP peaks and different cache conditions do not establish a universal winner.
 
-Runs recorded: 48
+Resolved issues: [implemented fixes and established workarounds](../../../../RESOLVED_ISSUES.md).
+
+Runs recorded: 38
 
 Next run ID: `RUN-0049`
 
@@ -51,7 +53,6 @@ for its file inventory and integrity verification.
 | `RUN-0002` | 2026-09-20T11:27:41Z | workaround | [Full sweep stopped after the c1 profile proved impractical](2026-09-20T11-27-41Z-aiperf-full-sweep-aborted.md) |
 | `RUN-0003` | 2026-09-20T11:29:56Z | resolved | [72-client AIPerf profile with NVML and SGLang metrics](2026-09-20T11-29-56Z-aiperf-c72-profile.md) |
 | `RUN-0004` | 2026-09-20T12:15:57Z | workaround | [Increasing the Mamba ratio raised admission only to 38](2026-09-20T12-15-57Z-mamba-ratio-c38.md) |
-| `RUN-0005` | 2026-09-20T12:20:27Z | resolved | [Explicit 360-slot cache exhausted the former static-memory budget](2026-09-20T12-20-27Z-mamba-cache-static-memory-failure.md) |
 | `RUN-0006` | 2026-09-20T12:25:45Z | resolved | [72-request server admission startup validation](2026-09-20T12-25-45Z-mamba-cache-c72-startup.md) |
 | `RUN-0007` | 2026-09-20T12:47:55Z | resolved | [Full c1–c72 AIPerf sweep at 72-request admission](2026-09-20T12-47-55Z-aiperf-full-c1-c72.md) |
 | `RUN-0008` | 2026-09-20T16:28:58Z | resolved | [Full concurrency performance report: throughput, latency, streaming pauses, and c72 tail behavior](2026-09-20T16-28-58Z-concurrency-performance-report.md) |
@@ -68,8 +69,6 @@ for its file inventory and integrity verification.
 | `RUN-0019` | 2026-09-26T01:36:19Z | resolved | [NVFP4 MTP=3: full three-trial concurrency sweep completed](2026-09-26T01-36-19Z-mtp3-sweep-complete.md) |
 | `RUN-0020` | 2026-09-26T01:43:10Z | resolved | [NVFP4 MTP=1: API and three-trial telemetry qualified](2026-09-26T01-43-10Z-mtp1-qualified.md) |
 | `RUN-0021` | 2026-09-26T03:02:55Z | resolved | [NVFP4 MTP=1: full three-trial concurrency sweep completed](2026-09-26T03-02-55Z-mtp1-sweep-complete.md) |
-| `RUN-0022` | 2026-09-26T03:03:11Z | resolved | [NVFP4 MTP=1/3 suite ended and shutdown was checked](2026-09-26T03-03-11Z-mtp13-suite-ended.md) |
-| `RUN-0023` | 2026-09-26T03:04:44Z | resolved | [NVFP4 MTP=1/3: final monitor and shutdown check](2026-09-26T03-04-44Z-mtp13-monitor-finished.md) |
 | `RUN-0024` | 2026-09-26T06:54:00Z | resolved | [NVFP4 MTP=1 results and repeated-trial cache effects](2026-09-26T06-54-00Z-mtp1-results-cache-assessment.md) |
 | `RUN-0025` | 2026-09-26T08:06:38Z | resolved | [Offline MTP comparison: source layout and missing-counter handling](2026-09-26T08-06-38Z-mtp-comparison-analysis-preflight.md) |
 | `RUN-0026` | 2026-09-26T08:06:38Z | resolved | [Final NVFP4 performance report: MTP disabled, MTP=1, MTP=2, MTP=3](2026-09-26T08-06-38Z-mtp-disabled-1-2-3-final-report.md) |
@@ -77,21 +76,14 @@ for its file inventory and integrity verification.
 | `RUN-0028` | 2026-09-27T11:05:54Z | resolved | [NVFP4 MTP=2: API and three-trial telemetry qualified](2026-09-27T11-05-54Z-mtp2-qualified.md) |
 | `RUN-0029` | 2026-09-27T11:07:37Z | resolved | [NVFP4 aligned MTP=2: startup, telemetry and initial inputs verified](2026-09-27T11-07-37Z-mtp2-aligned-startup-verification.md) |
 | `RUN-0030` | 2026-09-27T12:18:09Z | resolved | [NVFP4 MTP=2: full three-trial concurrency sweep completed](2026-09-27T12-18-09Z-mtp2-sweep-complete.md) |
-| `RUN-0031` | 2026-09-27T12:18:25Z | resolved | [NVFP4 aligned MTP=2 sweep ended and shutdown was checked](2026-09-27T12-18-25Z-mtp2-aligned-suite-ended.md) |
-| `RUN-0032` | 2026-09-27T12:18:25Z | resolved | [NVFP4 aligned MTP=2: final monitor and shutdown check](2026-09-27T12-18-25Z-mtp2-aligned-monitor-finished.md) |
 | `RUN-0033` | 2026-09-27T13:24:43Z | resolved | [Final NVFP4 summary with aligned MTP=2](2026-09-27T13-24-43Z-final-aligned-mtp-summary.md) |
 | `RUN-0034` | 2026-09-27T14:07:18Z | resolved | [Hardware counter access and GB10 calibration](2026-09-27T14-07-18Z-hardware-counter-calibration.md) |
 | `RUN-0035` | 2026-09-27T14:07:18Z | open | [MTP=2 fresh-cache c1/c8/c64 baseline launched](2026-09-27T14-07-18Z-hardware-pilot-baseline-launch.md) |
-| `RUN-0036` | 2026-09-27T14:11:53Z | open | [Hardware pilot: warmup CLI fix and preserved retry](2026-09-27T14-11-53Z-hardware-pilot-warmup-cli-retry.md) |
 | `RUN-0037` | 2026-09-27T14:24:57Z | open | [Hardware pilot qualified; isolated graph profiling scheduled](2026-09-27T14-24-57Z-hardware-pilot-qualified-and-profiling-scheduled.md) |
-| `RUN-0038` | 2026-09-27T14:29:32Z | open | [Retain completed c1 trial; fix lazy cache-counter validation and resume](2026-09-27T14-29-32Z-hardware-pilot-cache-metric-recovery.md) |
 | `RUN-0039` | 2026-09-27T15:00:27Z | resolved | [Fresh-cache c1/c8/c64 baseline: nine trials, 960 requests, service stopped](2026-09-27T15-00-27Z-hardware-pilot-baseline-complete.md) |
-| `RUN-0040` | 2026-09-27T15:04:30Z | open | [NVTX dependency and Docker build recovery; annotated profiling restarted](2026-09-27T15-04-30Z-hardware-pilot-nvtx-profiling-retry.md) |
-| `RUN-0041` | 2026-09-27T15:09:09Z | open | [Correct offline AIPerf cache; preflight client before profiler startup](2026-09-27T15-09-09Z-hardware-pilot-offline-client-cache-retry.md) |
 | `RUN-0042` | 2026-09-27T15:25:54Z | open | [Three timelines captured; enable detailed forward labels for counter sessions](2026-09-27T15-25-54Z-hardware-pilot-timelines-and-forward-annotations.md) |
 | `RUN-0043` | 2026-09-27T15:40:46Z | open | [Calibrate whole-range counters after intrusive per-kernel capture; restart remaining sessions](2026-09-27T15-40-46Z-hardware-pilot-application-range-calibration.md) |
 | `RUN-0044` | 2026-09-27T15:49:27Z | open | [Range-profiler startup OOM; retry with diagnostic memory headroom](2026-09-27T15-49-27Z-hardware-pilot-range-profiler-memory-headroom.md) |
-| `RUN-0045` | 2026-09-27T15:54:02Z | open | [Fixed Mamba budget rejected0.75; restore0.90 and cap diagnostic KV at65536](2026-09-27T15-54-02Z-hardware-pilot-fixed-mamba-budget-kv-cap.md) |
 | `RUN-0046` | 2026-09-27T16:05:09Z | open | [Full-range warmup OOM; bounded representative-kernel recovery](2026-09-27T16-05-09Z-hardware-pilot-bounded-kernel-recovery.md) |
 | `RUN-0047` | 2026-09-27T16:23:13Z | workaround | [Hardware-utilization report: normal trials, calibrated counters, selected kernels and shutdown](2026-09-27T16-23-13Z-hardware-utilization-final-report.md) |
 | `RUN-0048` | 2026-09-27T17:50:18Z | resolved | [Calibration table with ideal arithmetic intensity and Spark hardware balance](2026-09-27T17-50-18Z-calibration-arithmetic-intensity.md) |

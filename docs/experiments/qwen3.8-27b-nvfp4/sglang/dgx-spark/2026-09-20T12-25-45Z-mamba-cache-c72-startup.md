@@ -4,7 +4,7 @@ Run ID: `RUN-0006`
 
 - Status: resolved
 - Phase: engine startup
-- Related turns: [Static-memory allocation failure](2026-09-20T12-20-27Z-mamba-cache-static-memory-failure.md)
+- Related turns: [Mamba and diagnostic KV budget fixes](../../../../RESOLVED_ISSUES.md#mamba-and-diagnostic-kv-budgets)
 - Repo revision: `03fef1fa2114c30d915d6d8d40244e18e435d0b5`, dirty
 - Host/GPU: DGX Spark, one NVIDIA GB10
 - Container: `dgxspark/qwen3.8-27b-nvfp4-sglang:0.1.0`

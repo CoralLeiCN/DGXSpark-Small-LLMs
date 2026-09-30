@@ -4,7 +4,7 @@ Run ID: `RUN-0008`
 
 - Status: workaround (GPU capacity fallback; text inference qualified)
 - Phase: engine startup / model load / health check / inference
-- Related turns: [host preflight](2026-09-14T19-47-23Z-benchmark-host-preflight.md),
+- Related turns: [Established execution-access workarounds](../../../../RESOLVED_ISSUES.md#execution-access),
   [45 percent allocation qualification](2026-09-07T12-47-42Z-reduced-memory-qualified.md)
 - Repo revision: `17d39b06860ea7159a3d4a3443053b4d79bf867e`, dirty with benchmark files
 - Host/GPU: DGX Spark, Linux aarch64, GB10; driver `580.173.02`, CUDA capability `13.0`
@@ -51,7 +51,7 @@ about four minutes after container start.
 
 The engine's nvidia-smi capacity query cannot supply capacity on this unified
 memory GPU, but its PyTorch fallback successfully sizes memory. This differs
-from the sandbox inspection failure recorded in RUN-0006. Missing torchcodec
+from the established [sandbox inspection limitation](../../../../RESOLVED_ISSUES.md#execution-access). Missing torchcodec
 affects the optional audio path; the text benchmark does not exercise it.
 
 ## Fix Or Change

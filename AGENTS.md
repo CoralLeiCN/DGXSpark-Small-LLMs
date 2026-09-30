@@ -27,15 +27,20 @@
 - Maintain append-only inference experiment journals under
   `docs/experiments/<model>/<engine>/<hardware>/` by following
   `docs/experiments/README.md`.
-- Store every experiment turn in its own UTC-timestamped Markdown file named
+- Apply the journal guide's inclusion criteria before assigning a run ID. Store
+  each qualifying experiment turn in a UTC-timestamped Markdown file named
   `<YYYY-MM-DDTHH-MM-SSZ>-<short-slug>.md`, and keep the target directory's
   `README.md` index updated.
 - Assign every turn the next target-local, zero-padded ID (`RUN-0001`,
   `RUN-0002`, and so on). Put it immediately below the turn title, list it in
   the index, and never reuse or renumber an assigned ID.
-- Record every observed failure from Docker build or runtime operations, inference
-  engine startup, model loading, health checks, and inference validation. Add the
-  entry before ending the work session, even when the failure is still unresolved.
+- Record substantive failures from Docker build or runtime operations, inference
+  engine startup, model loading, health checks, and inference validation, including
+  unresolved failures, before ending the work session. Keep routine lifecycle
+  checks, repeated known sandbox-access errors, and corrected diagnostic-command
+  mistakes in artifacts or the relevant substantive entry, not separate turns.
+  Record benchmark results, first qualifications, and follow-ups that add material
+  evidence; follow `docs/experiments/README.md` for the precise inclusion rules.
 - Each failed experiment entry must include the redacted command and error, relevant
   environment and version details, evidence-based diagnosis, attempted or confirmed
   fix, verification result, status, and a reusable lesson for building reliable
@@ -48,3 +53,12 @@
 - Preserve journal chronology: do not add later findings to an earlier turn file.
   Create a new turn file that links to the earlier turn, never fabricate historical
   runs, and never record credentials or other secrets.
+- Before repeating an investigation, check `docs/RESOLVED_ISSUES.md` and the
+  current implementation. Known fixes and routine checks do not need new turns
+  unless they expose a regression, new limitation, or material evidence.
+- User-requested historical cleanup may consolidate implemented fixes in
+  `docs/RESOLVED_ISSUES.md` and delete superseded or trivial journals. Verify fixes
+  against code and evidence, retain useful outcomes and original dates, and update
+  links and indexes directly. Do not create compatibility stubs or retirement
+  registries. Preserve benchmark evidence and unresolved findings; leave next-ID
+  counters unchanged without renumbering retained runs.

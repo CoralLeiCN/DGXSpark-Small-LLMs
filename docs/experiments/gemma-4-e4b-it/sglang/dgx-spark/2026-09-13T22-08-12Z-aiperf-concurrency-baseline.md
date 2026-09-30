@@ -4,7 +4,7 @@ Run ID: `RUN-0005`
 
 - Status: resolved
 - Phase: inference / performance validation
-- Related turns: [client setup](2026-09-13T21-46-37Z-aiperf-client-preflight.md),
+- Related turns: [AIPerf client fixes](../../../../RESOLVED_ISSUES.md#aiperf-client-setup),
   [live Gemma startup](2026-09-13T22-00-25Z-gemma-started-for-aiperf.md)
 - Repo revision: `0d0acca2289c8d0475ba3c8dab76b366e4f150da`, dirty with
   benchmark documentation and journal changes
