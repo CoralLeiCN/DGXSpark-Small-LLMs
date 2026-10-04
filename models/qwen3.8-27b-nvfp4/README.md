@@ -119,6 +119,19 @@ the configured 2,048-token prefill chunks and scheduling operate separately.
 The c72 median of one queued request remains a separate admission-boundary
 observation whose exact mechanism is unconfirmed.
 
+## Planned NVFP4 drafter checkpoints
+
+The [two-checkpoint build spec](sglang/targets/dgx-spark/quantized-drafter-spec.md)
+defines max-calibrated and Local-Hessian NVFP4 conversions of Inco's official BF16
+DFlash2 drafter using NVIDIA Model Optimizer. It covers checkpoint creation,
+provenance and minimal reload/generation checks; implementation remains pending.
+Performance comparisons and serving-profile changes are separate follow-up work.
+
+The [research and checkpoint review](../../docs/reports/qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-10-04-quantized-drafter-review.md)
+records the community conversion method, NVIDIA sources and verification limits.
+[Serving intent](../../intend.md) defines the user-level performance priorities
+for later evaluation.
+
 ## Deployment
 
 Download the public checkpoint if it is not already cached:
