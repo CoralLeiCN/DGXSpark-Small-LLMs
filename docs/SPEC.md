@@ -49,12 +49,31 @@ own.
 
 ## Performance Benchmarking
 
+Serving configuration choices follow [intend.md](../intend.md): provide
+acceptable performance and reliability for individual users under concurrent
+load. Optimize sustainable capacity within the workload's stated user-level
+targets; an aggregate throughput maximum alone does not establish suitability.
+
 All inference performance experiments follow [BENCHMARKING.md](BENCHMARKING.md),
 including model-specific runners and ad hoc commands. That guide owns the
 NVIDIA-based sampling and comparison rules, repository request-count floor,
 warmup and repeated-trial requirements, and metrics/artifact retention policy.
 Existing reproduction defaults must not silently set the protocol for new work.
 Correctness and API smoke checks retain their task-specific validation budgets.
+
+## Derived Drafter Checkpoint Builds
+
+The planned [two Qwen DFlash2 NVFP4 checkpoint builds](../models/qwen3.8-27b-nvfp4/sglang/targets/dgx-spark/quantized-drafter-spec.md)
+are owned by the existing Qwen NVFP4 + SGLang + DGX Spark pack. They use NVIDIA
+Model Optimizer as an offline conversion tool, with conversion dependencies
+isolated in a model-specific container. It does not add an inference engine or
+move model dependencies into the host environment.
+
+The pack spec covers max-calibrated and Local-Hessian checkpoint creation,
+provenance, and minimal reload/generation checks. Benchmarking and serving-profile
+changes are separate follow-up work. Derived weights belong outside Git and must
+be identified as local conversions. Preserve official source checkpoints and
+existing serving profiles; implementation remains pending.
 
 ## Non-goals
 
@@ -121,6 +140,7 @@ cross product.
 ```text
 inferpack/
 |-- README.md
+|-- intend.md
 |-- pyproject.toml
 |-- uv.lock
 |-- monitoring/

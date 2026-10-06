@@ -23,4 +23,5 @@ date, and they do not create a new benchmark result.
 
 | Date | Model / target | Research document |
 | --- | --- | --- |
+| 2026-10-04 | Qwen3.8 27B NVFP4 / SGLang / DGX Spark | [Quantized DFlash2 drafter: quantization approach and safety review](qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-10-04-quantized-drafter-review.md) |
 | 2026-09-27 | Qwen3.8 27B NVFP4 / SGLang / DGX Spark | [NVFP4 performance gaps, CUDA Rust findings and next steps](qwen3.8-27b-nvfp4/sglang/dgx-spark/2026-09-27-nvfp4-performance-gaps-and-rust-research.md) |
