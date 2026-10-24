@@ -182,6 +182,38 @@ from another checkout.
 
 ## Commands
 
+### Standalone Nemotron vLLM Compose
+
+The root `docker-compose.yml` provides standalone Nano and Super vLLM
+profiles. These services are managed separately from the InferPack CLI and
+shared monitoring stack. Set local overrides in a root `.env` using
+`.env.example`, then start and validate a profile:
+
+```bash
+make vllm-run-nano
+# In another terminal:
+make vllm-validate-nano
+```
+
+Use `make vllm-run-super` and `make vllm-validate-super` for Super.
+`make vllm-down` stops these standalone services. Both profiles publish port
+8000 by default, so run one at a time. Override `VLLM_PORT` in `.env` if
+needed and set `OPENAI_BASE_URL` to the matching URL when validating.
+
+The validator can also run directly with `uv run --python 3.12 python
+validate_vllm.py`. It defaults to the Nano served name `model`; set
+`VLLM_MODEL=nemotron-3-super` for Super. It retries startup failures for up to
+600 seconds, controlled by `VLLM_VALIDATE_TIMEOUT_SECONDS`, and polls every
+10 seconds, controlled by `VLLM_VALIDATE_INTERVAL_SECONDS`.
+
+To download a model into the Hugging Face cache before starting the service:
+
+```bash
+uv run --python 3.12 scripts/download_hf_model.py
+```
+
+### InferPack CLI
+
 The Python 3.12 CLI runs through `uv`:
 
 ```bash
